@@ -1,0 +1,482 @@
+﻿@page
+@model LoginModel
+@{
+    ViewData["Title"] = "Ingresar";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="icon" type="image/png" href="~/images/logo.png" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FlowPress — Ingresar</title>
+    <link rel="stylesheet" href="~/css/flowpress.css" />
+    <style>
+        .login-page {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        /* ── PANEL IZQUIERDO ── */
+        .login-left {
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 3rem 4rem;
+            position: relative;
+            overflow: hidden;
+            border-right: 1px solid var(--border);
+        }
+
+        .login-left__bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 70% 50% at 30% 60%, rgba(232, 160, 32, 0.07) 0%, transparent 60%), radial-gradient(ellipse 40% 40% at 80% 20%, rgba(232, 160, 32, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .login-left__grid {
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 80% 80% at 30% 60%, black, transparent);
+            pointer-events: none;
+        }
+
+        .login-left__logo {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            position: relative;
+            z-index: 1;
+        }
+
+            .login-left__logo span {
+                color: var(--accent);
+            }
+
+        .login-left__content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-left__eyebrow {
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+        }
+
+        .login-left__title {
+            font-family: var(--font-display);
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 900;
+            line-height: 0.95;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.5rem;
+        }
+
+            .login-left__title em {
+                font-style: italic;
+                color: var(--accent);
+            }
+
+        .login-left__desc {
+            font-size: 0.95rem;
+            color: var(--fg-muted);
+            line-height: 1.7;
+            max-width: 360px;
+        }
+
+        .login-left__footer {
+            font-size: 0.75rem;
+            color: var(--fg-muted);
+            letter-spacing: 0.05em;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── PANEL DERECHO ── */
+        .login-right {
+            background: var(--bg-2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+        }
+
+        .login-form-wrap {
+            width: 100%;
+            max-width: 400px;
+            animation: fadeUp 0.8s 0.2s both;
+        }
+
+            .login-form-wrap h2 {
+                font-family: var(--font-display);
+                font-size: 2rem;
+                font-weight: 700;
+                margin-bottom: 0.5rem;
+            }
+
+            .login-form-wrap p {
+                font-size: 0.9rem;
+                color: var(--fg-muted);
+                margin-bottom: 2.5rem;
+            }
+
+                .login-form-wrap p a {
+                    color: var(--accent);
+                    transition: opacity 0.2s;
+                }
+
+                    .login-form-wrap p a:hover {
+                        opacity: 0.8;
+                    }
+
+        /* ── FORM FIELDS ── */
+        .field {
+            margin-bottom: 1.5rem;
+        }
+
+            .field label {
+                display: block;
+                font-size: 0.7rem;
+                letter-spacing: 0.15em;
+                text-transform: uppercase;
+                color: var(--fg-muted);
+                margin-bottom: 0.6rem;
+            }
+
+            .field input {
+                width: 100%;
+                background: var(--bg);
+                border: 1px solid var(--border);
+                color: var(--fg);
+                font-family: var(--font-body);
+                font-size: 0.95rem;
+                padding: 0.9rem 1.2rem;
+                outline: none;
+                transition: border-color 0.2s;
+                -webkit-appearance: none;
+            }
+
+                .field input:focus {
+                    border-color: var(--accent);
+                }
+
+                .field input::placeholder {
+                    color: var(--fg-muted);
+                    opacity: 0.5;
+                }
+
+        .field-error {
+            font-size: 0.75rem;
+            color: #e85020;
+            margin-top: 0.4rem;
+            letter-spacing: 0.03em;
+        }
+
+        /* ── REMEMBER + FORGOT ── */
+        .form-extras {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .remember {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            cursor: pointer;
+        }
+
+            .remember input[type="checkbox"] {
+                width: 14px;
+                height: 14px;
+                accent-color: var(--accent);
+                cursor: pointer;
+            }
+
+            .remember span {
+                font-size: 0.8rem;
+                color: var(--fg-muted);
+            }
+
+        .forgot {
+            font-size: 0.8rem;
+            color: var(--fg-muted);
+            transition: color 0.2s;
+        }
+
+            .forgot:hover {
+                color: var(--accent);
+            }
+
+        /* ── SUBMIT ── */
+        .btn-login {
+            width: 100%;
+            padding: 1rem;
+            background: var(--accent);
+            color: var(--bg);
+            border: none;
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+            .btn-login:hover {
+                background: var(--accent-2);
+                transform: translateY(-1px);
+            }
+
+        /* ── ERROR GENERAL ── */
+        .login-error {
+            background: rgba(232, 80, 32, 0.08);
+            border: 1px solid rgba(232, 80, 32, 0.3);
+            color: #e85020;
+            font-size: 0.85rem;
+            padding: 0.9rem 1.2rem;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.02em;
+        }
+
+        /* ── DIVIDER ── */
+        .form-divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+            .form-divider::before,
+            .form-divider::after {
+                content: '';
+                flex: 1;
+                height: 1px;
+                background: var(--border);
+            }
+
+            .form-divider span {
+                font-size: 0.7rem;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                color: var(--fg-muted);
+            }
+
+        .btn-register {
+            display: block;
+            width: 100%;
+            padding: 0.9rem;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--fg-muted);
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s, color 0.2s;
+        }
+
+            .btn-register:hover {
+                border-color: var(--fg-muted);
+                color: var(--fg);
+            }
+
+        /* ── RESPONSIVE ── */
+        @@media (max-width: 768px) {
+            .login-page {
+                grid-template-columns: 1fr;
+            }
+
+            .login-left {
+                display: none;
+            }
+
+            .login-right {
+                padding: 2rem;
+            }
+        }
+
+
+        /* ── ANIMACIONES ── */
+
+        @@keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* grid animado */
+
+        .login-left__grid {
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 80% 80% at 30% 60%, black, transparent);
+            pointer-events: none;
+            animation: gridMove 40s linear infinite;
+        }
+
+        @@keyframes gridMove {
+            from {
+                transform: translateY(0px);
+            }
+
+            to {
+                transform: translateY(60px);
+            }
+        }
+
+        /* animación título */
+
+        .login-left__title {
+            animation: titleReveal 1s ease forwards;
+        }
+
+        @@keyframes titleReveal {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+                letter-spacing: 0.2em;
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+                letter-spacing: -0.03em;
+            }
+        }
+
+        /* micro animación botón */
+
+        .btn-login {
+            transition: all 0.25s ease;
+        }
+
+            .btn-login:hover {
+                transform: translateY(-2px) scale(1.02);
+            }
+    </style>
+</head>
+<body>
+    <div class="login-page">
+
+        <!-- PANEL IZQUIERDO -->
+        <div class="login-left">
+            <div class="login-left__bg"></div>
+            <div class="login-left__grid"></div>
+
+            <a href="/" class="login-left__logo">Flow<span>Press</span></a>
+
+            <div class="login-left__content">
+                <p class="login-left__eyebrow">Bienvenido de vuelta</p>
+                <h2 class="login-left__title">
+                    Tu contenido<br>
+                    te <em>espera.</em>
+                </h2>
+                <p class="login-left__desc">
+                    Accede a tu cuenta para explorar, guardar y gestionar
+                    contenido desde múltiples fuentes en un solo lugar.
+                </p>
+            </div>
+
+            <p class="login-left__footer">SC-701 · Programación Avanzada Web · @DateTime.Now.Year</p>
+        </div>
+
+        <!-- PANEL DERECHO -->
+        <div class="login-right">
+            <div class="login-form-wrap">
+                <h2>Ingresar</h2>
+                <p>¿No tienes cuenta? <a asp-page="./Register">Regístrate aquí</a></p>
+
+                @if (!ModelState.IsValid)
+                {
+                    <div class="login-error">
+                        <div asp-validation-summary="All" class="login-error"></div>
+                    </div>
+                }
+
+                <form method="post">
+                    <div class="field">
+                        <label asp-for="Input.Email">Nombre de usuario</label>
+                        <input asp-for="Input.Email"
+                               type="text"
+                               placeholder="ej. john_doe"
+                               autocomplete="username" />
+                        <span asp-validation-for="Input.Email" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.Password">Contraseña</label>
+                        <input asp-for="Input.Password"
+                               type="password"
+                               placeholder="••••••••"
+                               autocomplete="current-password" />
+                        <span asp-validation-for="Input.Password" class="field-error"></span>
+                    </div>
+
+                    <div class="form-extras">
+                        <label class="remember">
+                            <input asp-for="Input.RememberMe" type="checkbox" />
+                            <span>Recordarme</span>
+                        </label>
+                        <a asp-page="./ForgotPassword" class="forgot">¿Olvidaste tu contraseña?</a>
+                    </div>
+
+                    <button type="submit" class="btn-login">Ingresar</button>
+
+                    <div class="form-divider"><span>o</span></div>
+
+                    <a asp-page="./Register" class="btn-register">Crear cuenta nueva</a>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    
+    <!-- parallax suave con el mouse en el panel izquierdo SUTIL, BELLO -->
+    <script>
+        document.addEventListener("mousemove", (e) => {
+
+            const bg = document.querySelector(".login-left__bg");
+            const grid = document.querySelector(".login-left__grid");
+
+            const x = (e.clientX / window.innerWidth - 0.5) * 20;
+            const y = (e.clientY / window.innerHeight - 0.5) * 20;
+
+            if(bg){
+                bg.style.backgroundPosition = `${50 + x/5}% ${50 + y/5}%`;
+            }
+
+            if(grid){
+                grid.style.backgroundPosition = `${x}px ${y}px`;
+            }
+
+        });
+    </script>
+</body>
+</html>

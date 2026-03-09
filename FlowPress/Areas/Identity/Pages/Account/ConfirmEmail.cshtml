@@ -1,0 +1,132 @@
+﻿@page
+@model ConfirmEmailModel
+@{
+    ViewData["Title"] = "Email confirmado";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="icon" type="image/png" href="~/images/logo.png" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FlowPress — Email confirmado</title>
+    <link rel="stylesheet" href="~/css/flowpress.css" />
+    <style>
+        .confirm-page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .confirm-page__bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(232, 160, 32, 0.06) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .confirm-page__grid {
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+            pointer-events: none;
+        }
+
+        .confirm-page__logo {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 900;
+            position: absolute;
+            top: 3rem;
+            left: 4rem;
+        }
+
+            .confirm-page__logo span {
+                color: var(--accent);
+            }
+
+        .confirm-page__icon {
+            font-size: 4rem;
+            margin-bottom: 2rem;
+            animation: fadeUp 0.8s 0.2s both;
+        }
+
+        .confirm-page__title {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+            animation: fadeUp 0.8s 0.4s both;
+        }
+
+            .confirm-page__title em {
+                font-style: italic;
+                color: var(--accent);
+            }
+
+        .confirm-page__desc {
+            font-size: 1rem;
+            color: var(--fg-muted);
+            max-width: 420px;
+            line-height: 1.7;
+            margin-bottom: 2.5rem;
+            animation: fadeUp 0.8s 0.6s both;
+        }
+
+        .confirm-page__actions {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            animation: fadeUp 0.8s 0.8s both;
+        }
+
+        .confirm-page__error {
+            color: #e85020;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            animation: fadeUp 0.8s 0.4s both;
+        }
+    </style>
+</head>
+<body>
+    <div class="confirm-page">
+        <div class="confirm-page__bg"></div>
+        <div class="confirm-page__grid"></div>
+        <a href="/" class="confirm-page__logo">Flow<span>Press</span></a>
+
+        @if (Model.StatusMessage == "Error confirming your email.")
+        {
+            <div class="confirm-page__icon">❌</div>
+            <h1 class="confirm-page__title">Algo salió<br><em>mal.</em></h1>
+            <p class="confirm-page__error">@Model.StatusMessage</p>
+            <div class="confirm-page__actions">
+                <a href="/" class="btn-primary">Ir al inicio</a>
+            </div>
+        }
+        else
+        {
+            <div class="confirm-page__icon">🎉</div>
+            <h1 class="confirm-page__title">Cuenta<br><em>activada.</em></h1>
+            <p class="confirm-page__desc">
+                Tu correo fue confirmado correctamente.
+                Ya puedes ingresar y comenzar a usar FlowPress.
+            </p>
+            <div class="confirm-page__actions">
+                <a asp-area="Identity" asp-page="/Account/Login" class="btn-primary">Ingresar ahora</a>
+                <a href="/" class="btn-ghost">Ir al inicio</a>
+            </div>
+        }
+    </div>
+</body>
+</html>

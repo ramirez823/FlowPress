@@ -1,0 +1,35 @@
+# ── BUILD OUTPUTS ───────────────────────────────────
+bin/
+obj/
+out/
+
+# ── VISUAL STUDIO ───────────────────────────────────
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.rsuser
+
+# ── SECRETOS Y CONFIGURACIÓN LOCAL ──────────────────
+appsettings.Development.json
+**/appsettings.Development.json
+appsettings.*.json
+!appsettings.json
+
+# ── ENTITY FRAMEWORK ────────────────────────────────
+*.db
+*.sqlite
+
+# ── NODE / NPM (si se usa) ───────────────────────────
+node_modules/
+npm-debug.log
+
+# ── PUBLICACIÓN ─────────────────────────────────────
+publish/
+**/publish/
+
+# ── OTROS ───────────────────────────────────────────
+*.log
+.DS_Store
+Thumbs.db

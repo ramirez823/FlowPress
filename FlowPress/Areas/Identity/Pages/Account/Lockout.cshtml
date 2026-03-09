@@ -1,0 +1,92 @@
+﻿@page
+@model LockoutModel
+@{
+    ViewData["Title"] = "Cuenta bloqueada";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="icon" type="image/png" href="~/images/logo.png" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FlowPress — Cuenta bloqueada</title>
+    <link rel="stylesheet" href="~/css/flowpress.css" />
+    <style>
+        .error-page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .error-page__bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(232, 80, 32, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .error-page__logo {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 900;
+            position: absolute;
+            top: 3rem;
+            left: 4rem;
+        }
+
+            .error-page__logo span {
+                color: var(--accent);
+            }
+
+        .error-page__code {
+            font-family: var(--font-display);
+            font-size: clamp(6rem, 20vw, 14rem);
+            font-weight: 900;
+            line-height: 1;
+            color: rgba(232, 80, 32, 0.15);
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .error-page__title {
+            font-family: var(--font-display);
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .error-page__desc {
+            font-size: 1rem;
+            color: var(--fg-muted);
+            max-width: 420px;
+            line-height: 1.7;
+            margin-bottom: 2.5rem;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-page">
+        <div class="error-page__bg"></div>
+        <a href="/" class="error-page__logo">Flow<span>Press</span></a>
+        <div class="error-page__code">🔒</div>
+        <h1 class="error-page__title">Cuenta bloqueada</h1>
+        <p class="error-page__desc">
+            Tu cuenta ha sido bloqueada temporalmente por múltiples
+            intentos fallidos. Intenta de nuevo más tarde o recupera
+            tu contraseña.
+        </p>
+        <a asp-area="Identity" asp-page="/Account/ForgotPassword" class="btn-primary">
+            Recuperar contraseña
+        </a>
+    </div>
+</body>
+</html>

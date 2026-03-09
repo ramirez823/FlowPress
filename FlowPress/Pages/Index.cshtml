@@ -1,0 +1,229 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "FlowPress"; 
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="icon" type="image/png" href="~/images/logo.png" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FlowPress — Contenido que importa</title>
+    <link rel="stylesheet" href="~/css/flowpress.css" />
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="nav">
+        <a href="/" class="nav__logo">Flow<span>Press</span></a>
+        <ul class="nav__links">
+            <li><a href="#articles">Artículos</a></li>
+            <li><a href="#how">Cómo funciona</a></li>
+            <li><a href="#sources">Fuentes</a></li>
+            @if (User.Identity.IsAuthenticated)
+            {
+                <li class="nav__user">
+                    <span class="nav__username">@User.Identity.Name</span>
+                </li>
+                <li>
+                    <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/" method="post">
+                        <button type="submit" class="nav__logout">Salir</button>
+                    </form>
+                </li>
+            }
+            else
+            {
+                <li><a asp-area="Identity" asp-page="/Account/Login" class="nav__cta">Ingresar</a></li>
+            }
+        </ul>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero__bg"></div>
+        <div class="hero__grid-lines"></div>
+        <div class="hero__content">
+            <p class="hero__eyebrow">Agregador de contenido · SC-701</p>
+            <h1 class="hero__title">
+                Todo el<br>
+                contenido<br>
+                <em>que importa.</em>
+            </h1>
+            <p class="hero__subtitle">
+                FlowPress centraliza múltiples fuentes de noticias en un solo lugar.
+                Lee, filtra y guarda lo que realmente necesitas.
+            </p>
+            <div class="hero__actions">
+                <a asp-area="Identity" asp-page="/Account/Login" class="btn-primary">Comenzar ahora</a>
+                <a href="#how" class="btn-ghost">Ver cómo funciona</a>
+            </div>
+        </div>
+        <div class="hero__scroll">
+            <div class="hero__scroll-line"></div>
+            <span>Scroll</span>
+        </div>
+    </section>
+
+    <!-- ARTÍCULOS DESTACADOS -->
+    <section class="section" id="articles">
+        <div class="section__header">
+            <div>
+                <p class="section__label">Últimas entradas</p>
+                <h2 class="section__title reveal">Artículos<br>destacados</h2>
+            </div>
+            <a asp-page="/Account/Login" class="section__link">Ver todos →</a>
+        </div>
+
+        @if (Model.Items.Any())
+        {
+            <div class="articles-grid">
+                @{
+                    var first = Model.Items.First();
+                }
+                <div class="card card--featured reveal">
+                    <p class="card__category">@(first.Normalized?.Category?.Primary ?? "General")</p>
+                    <h3 class="card__title">@(first.Normalized?.Title ?? "Sin título")</h3>
+                    <p class="card__summary">@(first.Normalized?.Summary ?? first.Normalized?.Content?.Substring(0, Math.Min(200, first.Normalized?.Content?.Length ?? 0)))</p>
+                    <div class="card__meta">
+                        <span>@(first.Source?.Name ?? "Fuente")</span>
+                        <span class="card__meta-dot"></span>
+                        <span>@(first.Normalized?.PublishedAt.ToString("dd MMM yyyy") ?? "")</span>
+                    </div>
+                    <div class="card__accent-line"></div>
+                </div>
+                @foreach (var item in Model.Items.Skip(1).Take(4))
+                {
+                    <div class="card reveal">
+                        <p class="card__category">@(item.Normalized?.Category?.Primary ?? "General")</p>
+                        <h3 class="card__title">@(item.Normalized?.Title ?? "Sin título")</h3>
+                        <div class="card__meta">
+                            <span>@(item.Source?.Name ?? "Fuente")</span>
+                            <span class="card__meta-dot"></span>
+                            <span>@(item.Normalized?.PublishedAt.ToString("dd MMM") ?? "")</span>
+                        </div>
+                        <div class="card__accent-line"></div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="articles-grid">
+                <!-- este contador solo es para el ejemplo, favor hacerlo bien y mantener el formato -->
+                @for (int i = 0; i < 5; i++)
+                {
+                    <div class="card @(i == 0 ? "card--featured" : "") reveal">
+                        <p class="card__category">Tecnología</p>
+                        <h3 class="card__title">@(i == 0 ? "El futuro del periodismo digital está en la agregación inteligente de fuentes" : $"Artículo de ejemplo {i + 1}")</h3>
+                        @if (i == 0)
+                        {
+                            <p class="card__summary">Los nuevos sistemas de agregación permiten centralizar contenido de múltiples fuentes en tiempo real, transformando la forma en que consumimos información.</p>
+                        }
+                        <div class="card__meta">
+                            <span>Example News</span>
+                            <span class="card__meta-dot"></span>
+                            <span>@DateTime.Now.ToString("dd MMM yyyy")</span>
+                        </div>
+                        <div class="card__accent-line"></div>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+
+    <!-- CÓMO FUNCIONA -->
+    <section class="section how-section" id="how">
+        <div class="section__header">
+            <div>
+                <p class="section__label">El proceso</p>
+                <h2 class="section__title reveal">Cómo<br>funciona</h2>
+            </div>
+        </div>
+        <div class="steps-grid">
+            <div class="step reveal">
+                <div class="step__number">01</div>
+                <h3 class="step__title">Conecta tus fuentes</h3>
+                <p class="step__desc">Agrega URLs de APIs, feeds RSS o endpoints JSON. FlowPress las lee y normaliza automáticamente.</p>
+            </div>
+            <div class="step reveal">
+                <div class="step__number">02</div>
+                <h3 class="step__title">Explora el contenido</h3>
+                <p class="step__desc">El contenido se parsea y presenta de forma limpia. Filtra por fuente, categoría o fecha.</p>
+            </div>
+            <div class="step reveal">
+                <div class="step__number">03</div>
+                <h3 class="step__title">Guarda lo que importa</h3>
+                <p class="step__desc">Guarda artículos en la base de datos, exporta a JSON e importa contenido de otros sistemas.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FUENTES -->
+    <section class="section" id="sources">
+        <div class="section__header">
+            <div>
+                <p class="section__label">Fuentes activas</p>
+                <h2 class="section__title reveal">De dónde<br>viene el contenido</h2>
+            </div>
+        </div>
+        <div class="sources-grid">
+            @if (Model.Sources.Any())
+            {
+                @foreach (var source in Model.Sources)
+                {
+                    <div class="source-card reveal">
+                        <p class="source-card__type">@source.ComponentType</p>
+                        <h3 class="source-card__name">@source.Name</h3>
+                        <p class="source-card__url">@source.Url</p>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="source-card reveal">
+                    <p class="source-card__type">API</p>
+                    <h3 class="source-card__name">Example News</h3>
+                    <p class="source-card__url">https://example.com/feed</p>
+                </div>
+                <div class="source-card reveal">
+                    <p class="source-card__type">Feed</p>
+                    <h3 class="source-card__name">Tech Today</h3>
+                    <p class="source-card__url">https://techtoday.com/api</p>
+                </div>
+                <div class="source-card reveal">
+                    <p class="source-card__type">Widget</p>
+                    <h3 class="source-card__name">Global Press</h3>
+                    <p class="source-card__url">https://globalpress.io/feed</p>
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- CTA FINAL -->
+    <section class="cta-section">
+        <div class="cta-section__bg"></div>
+        @if (!User.Identity.IsAuthenticated)
+        {
+            <h2 class="cta-section__title reveal">Empieza<br><em>hoy.</em></h2>
+            <p class="cta-section__sub reveal">Accede a tu cuenta y comienza a agregar fuentes.</p>
+            <a asp-area="Identity" asp-page="/Account/Login" class="btn-primary reveal">Ir al login</a>
+        }
+        else
+        {
+            <h2 class="cta-section__title reveal">Bienvenido,<br><em>@User.Identity.Name</em></h2>
+            <p class="cta-section__sub reveal">Ya estás dentro. Explora el contenido.</p>
+            <a href="#articles" class="btn-primary reveal">Ver artículos</a>
+        }
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer__logo">Flow<span>Press</span></div>
+        <p class="footer__copy">SC-701 · Programación Avanzada Web · @DateTime.Now.Year</p>
+    </footer>
+
+    <script src="~/js/animations.js"></script>
+</body>
+</html>

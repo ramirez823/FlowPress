@@ -22,6 +22,12 @@
             <li><a href="#articles">Artículos</a></li>
             <li><a href="#how">Cómo funciona</a></li>
             <li><a href="#sources">Fuentes</a></li>
+
+            @if (User.IsInRole("Admin"))
+            {
+                <li><a asp-page="/Configuration/Index">Configuración</a></li>
+            }
+
             @if (User.Identity.IsAuthenticated)
             {
                 <li class="nav__user">

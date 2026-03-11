@@ -1,0 +1,58 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - FlowPress</title>
+    <link rel="icon" type="image/png" href="~/images/logo.png" />
+    <link rel="stylesheet" href="~/css/flowpress.css" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+
+    <!-- NAVBAR (igual que en landing page) -->
+    <nav class="nav">
+        <a href="/" class="nav__logo">Flow<span>Press</span></a>
+        <ul class="nav__links">
+            <li><a href="/#articles">Artículos</a></li>
+            <li><a href="/#how">Cómo funciona</a></li>
+            <li><a href="/#sources">Fuentes</a></li>
+
+            @if (User.IsInRole("Admin"))
+            {
+                <li><a asp-page="/Configuration/Index">Configuración</a></li>
+            }
+
+            @if (User.Identity.IsAuthenticated)
+            {
+                <li class="nav__user">
+                    <span class="nav__username">@User.Identity.Name</span>
+                </li>
+                <li>
+                    <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/" method="post">
+                        <button type="submit" class="nav__logout">Salir</button>
+                    </form>
+                </li>
+            }
+            else
+            {
+                <li><a asp-area="Identity" asp-page="/Account/Login" class="nav__cta">Ingresar</a></li>
+            }
+        </ul>
+    </nav>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-content">
+        @RenderBody()
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer__logo">Flow<span>Press</span></div>
+        <p class="footer__copy">SC-701 · Programación Avanzada Web · @DateTime.Now.Year</p>
+    </footer>
+
+    <script src="~/js/animations.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

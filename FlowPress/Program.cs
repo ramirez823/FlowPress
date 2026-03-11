@@ -26,19 +26,27 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => {
 .AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-builder.Services.AddRazorPages();
 
-
+// Registro de servicios
 //recuperacion de contrasenia por email
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IEmailSender, IdentityEmailSender>();
 //-------------------------------------------------------------
-
 builder.Services.AddScoped<IContentService, ContentService>();
+builder.Services.AddScoped<IEncryptionService, EncryptionService>();
+builder.Services.AddScoped<ISecretService, SecretService>();
 
+// Registro de repositorios
 builder.Services.AddScoped<ISourceRepository, SourceRepository>();
 builder.Services.AddScoped<ISourceItemRepository, SourceItemRepository>();
+builder.Services.AddScoped<ISecretRepository, SecretRepository>(); // <--- Aquí
 
+
+
+// Registrar el seed de admin como hosted service
+builder.Services.AddHostedService<AdminSeedService>();
+
+builder.Services.AddRazorPages();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -52,6 +60,7 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
 
 app.UseHttpsRedirection();
 

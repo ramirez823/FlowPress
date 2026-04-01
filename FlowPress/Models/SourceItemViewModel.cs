@@ -5,7 +5,7 @@ namespace FlowPress.Models;
 
 public class SourceItemViewModel
 {
-    public Source? Source { get; set; }
+    public IngestModels? Source { get; set; }
     public NormalizedContent? Normalized { get; set; }
     public SourceSchema? Schema { get; set; }
     public RawContent? Raw { get; set; }

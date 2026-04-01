@@ -38,6 +38,7 @@ builder.Services.AddScoped<IContentService, ContentService>();
 
 builder.Services.AddScoped<ISourceRepository, SourceRepository>();
 builder.Services.AddScoped<ISourceItemRepository, SourceItemRepository>();
+builder.Services.AddScoped<JsonImportService>();
 
 var app = builder.Build();
 

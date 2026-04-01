@@ -4,8 +4,8 @@ namespace FlowPress.Repositories.Interfaces;
 
 public interface ISourceRepository
 {
-    Task<IEnumerable<Source>> GetAllAsync();
-    Task<Source?> GetByIdAsync(int id);
-    Task AddAsync(Source source);
+    Task<IEnumerable<IngestModels>> GetAllAsync();
+    Task<IngestModels?> GetByIdAsync(int id);
+    Task AddAsync(IngestModels source);
     Task DeleteAsync(int id);
 }

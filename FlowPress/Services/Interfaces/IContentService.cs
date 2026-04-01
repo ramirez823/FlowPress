@@ -5,6 +5,6 @@ namespace FlowPress.Services.Interfaces;
 public interface IContentService
 {
     Task<IEnumerable<SourceItem>> GetAllItemsAsync();
-    Task<IEnumerable<Source>> GetAllSourcesAsync();
+    Task<IEnumerable<IngestModels>> GetAllSourcesAsync();
     Task SaveItemAsync(SourceItem item);
 }

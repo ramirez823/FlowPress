@@ -10,5 +10,5 @@ public class SourceItem
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // Navegacion......
-    public Source? Source { get; set; }
+    public IngestModels? Source { get; set; }
 }

@@ -9,7 +9,7 @@ namespace FlowPress.Pages
         private readonly IContentService _contentService;
 
         public IEnumerable<SourceItemViewModel> Items { get; set; } = [];
-        public IEnumerable<Source> Sources { get; set; } = [];
+        public IEnumerable<IngestModels> Sources { get; set; } = [];
 
         public IndexModel(IContentService contentService)
         {

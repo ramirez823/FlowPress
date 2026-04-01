@@ -14,13 +14,13 @@ public class SourceRepository : ISourceRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<Source>> GetAllAsync() =>
+    public async Task<IEnumerable<IngestModels>> GetAllAsync() =>
         await _context.Sources.ToListAsync();
 
-    public async Task<Source?> GetByIdAsync(int id) =>
+    public async Task<IngestModels?> GetByIdAsync(int id) =>
         await _context.Sources.FindAsync(id);
 
-    public async Task AddAsync(Source source)
+    public async Task AddAsync(IngestModels source)
     {
         await _context.Sources.AddAsync(source);
         await _context.SaveChangesAsync();

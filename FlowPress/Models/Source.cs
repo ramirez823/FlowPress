@@ -2,7 +2,7 @@
 
 namespace FlowPress.Models;
 
-public class Source
+public class IngestModels
 {
     public int Id { get; set; }
     public string Url { get; set; } = string.Empty;

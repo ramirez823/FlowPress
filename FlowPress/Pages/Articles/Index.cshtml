@@ -1,0 +1,45 @@
+﻿@page
+@model FlowPress.Pages.Articles.IndexModel
+
+@{
+    ViewData["Title"] = "Artículos";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">Noticias importadas</h2>
+
+    @if (!Model.Articles.Any())
+    {
+        <div class="alert alert-warning text-center">
+            No hay artículos importados.
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var article in Model.Articles)
+            {
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm h-100 p-3">
+                        <h4 class="mb-3">@article.Title</h4>
+
+                        <p class="text-muted mb-2">
+                            <strong>Fuente:</strong> @article.SourceName
+                        </p>
+
+                        <p class="text-muted mb-3">
+                            <strong>Fecha de publicación:</strong> @article.PublishedAt
+                        </p>
+
+                        <p>@article.Content</p>
+                        <a asp-page="/Export/Item"
+                           asp-route-id="@article.Id"
+                           class="btn btn-sm btn-outline-primary mt-2">
+                            Exportar JSON
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

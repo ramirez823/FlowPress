@@ -18,7 +18,7 @@ public class ContentService : IContentService
     public async Task<IEnumerable<SourceItem>> GetAllItemsAsync() =>
         await _sourceItemRepository.GetAllAsync();
 
-    public async Task<IEnumerable<Source>> GetAllSourcesAsync() =>
+    public async Task<IEnumerable<IngestModels>> GetAllSourcesAsync() =>
         await _sourceRepository.GetAllAsync();
 
     public async Task SaveItemAsync(SourceItem item) =>

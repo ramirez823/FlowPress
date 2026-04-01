@@ -9,7 +9,7 @@ namespace FlowPress.Data
             : base(options)
         {
         }
-        public DbSet<Source> Sources { get; set; }
+        public DbSet<IngestModels> Sources { get; set; }
         public DbSet<SourceItem> SourceItems { get; set; }
     }
 }

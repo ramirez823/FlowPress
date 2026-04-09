@@ -35,4 +35,9 @@ public class SourceRepository : ISourceRepository
             await _context.SaveChangesAsync();
         }
     }
+
+    public async Task<Source?> GetByUrlAsync(string url) =>
+    await _context.Sources.FirstOrDefaultAsync(s => s.Url == url);
+
+
 }

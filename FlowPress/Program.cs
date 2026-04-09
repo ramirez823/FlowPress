@@ -3,10 +3,6 @@ using FlowPress.Repositories;
 using FlowPress.Repositories.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using FlowPress.Repositories;
-using FlowPress.Repositories.Interfaces;
-using FlowPress.Services;
-using FlowPress.Services.Interfaces;
 using FlowPress.Services;
 using FlowPress.Services.Interfaces;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -39,12 +35,37 @@ builder.Services.AddScoped<ISecretService, SecretService>();
 // Registro de repositorios
 builder.Services.AddScoped<ISourceRepository, SourceRepository>();
 builder.Services.AddScoped<ISourceItemRepository, SourceItemRepository>();
-builder.Services.AddScoped<ISecretRepository, SecretRepository>(); // <--- Aquí
+builder.Services.AddScoped<ISecretRepository, SecretRepository>(); 
 
+
+// Registro de News Adapters y Aggregator
+builder.Services.AddHttpClient<FlowPress.Services.News.GNewsAdapter>();
+builder.Services.AddHttpClient<FlowPress.Services.News.NewsApiAdapter>();
+builder.Services.AddHttpClient<FlowPress.Services.News.NewsDataAdapter>();
+builder.Services.AddHttpClient<FlowPress.Services.News.MediaStackAdapter>()
+    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+    {
+        // MediaStack plan gratuito no soporta HTTPS
+        AllowAutoRedirect = false
+    });
+
+builder.Services.AddScoped<INewsAdapter, FlowPress.Services.News.GNewsAdapter>();
+
+builder.Services.AddHttpClient<FlowPress.Services.News.NewsApiAdapter>(client => //como jode 
+{
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("FlowPress/1.0");
+});
+builder.Services.AddScoped<INewsAdapter, FlowPress.Services.News.NewsDataAdapter>();
+builder.Services.AddScoped<INewsAdapter, FlowPress.Services.News.MediaStackAdapter>();
+builder.Services.AddScoped<INewsAggregatorService, FlowPress.Services.News.NewsAggregatorService>();
 
 
 // Registrar el seed de admin como hosted service
 builder.Services.AddHostedService<AdminSeedService>();
+
+builder.Services.AddHostedService<NewsSourcesSeedService>();
+
+
 
 builder.Services.AddRazorPages();
 var app = builder.Build();

@@ -303,9 +303,10 @@
         <div class="config-tabs">
             <button class="config-tab active" data-tab="roles">Roles de usuario</button>
             <button class="config-tab" data-tab="secrets">Secrets (API Keys)</button>
+            <button class="config-tab" data-tab="destacados">Destacados</button>
+            <button class="config-tab" data-tab="importar">Importar</button>
         </div>
 
-        <!-- Panel Roles -->
         <div class="tab-pane active" id="tab-roles">
             <table class="config-table">
                 <thead>
@@ -335,7 +336,6 @@
             </table>
         </div>
 
-        <!-- Panel Secrets -->
         <div class="tab-pane" id="tab-secrets">
             <table class="config-table">
                 <thead>
@@ -397,15 +397,89 @@
                 </form>
             </div>
         </div>
+
+        <div class="tab-pane" id="tab-destacados">
+            @if (!Model.AllItems.Any())
+            {
+                <p style="color:var(--fg-muted);font-size:0.9rem;margin-top:2rem;">
+                    No hay artículos importados aún. Usá la importación de JSON para agregar contenido.
+                </p>
+            }
+            else
+            {
+                <table class="config-table">
+                    <thead>
+                        <tr>
+                            <th>Título</th>
+                            <th>Fuente</th>
+                            <th>Importado</th>
+                            <th>Destacado</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.AllItems)
+                        {
+                            var vm = new FlowPress.Models.SourceItemViewModel(item);
+                            <tr>
+                                <td>@(vm.Normalized?.Title ?? "Sin título")</td>
+                                <td>@(item.Source?.Name ?? "—")</td>
+                                <td>@item.CreatedAt.ToString("dd MMM yyyy")</td>
+                                <td>
+                                    <form method="post" asp-page-handler="ToggleFeatured" asp-route-id="@item.Id">
+                                        <button type="submit" class="btn-config-secondary" style="display:inline-block;text-decoration:none;">
+                                            <!--style="padding:0.3rem 0.8rem;font-size:0.7rem;">-->
+                                            @(item.IsFeatured ? "✓ Quitar" : "Destacar")
+                                        </button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <a href="/Configuration/Index?handler=Export&id=@item.Id"
+                                       class="btn-config-secondary"
+                                       style="display:inline-block;text-decoration:none;">
+                                        ↓ JSON
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+
+        <div class="tab-pane" id="tab-importar">
+            @if (TempData["ImportMessage"] is string msg)
+            {
+                <div style="padding: 1rem 1.5rem; margin-bottom: 2rem; border: 1px solid @(TempData["ImportSuccess"] is true ? "var(--accent)" : "#a00"); background: @(TempData["ImportSuccess"] is true ? "rgba(232,160,32,0.05)" : "rgba(170,0,0,0.05)"); color: @(TempData["ImportSuccess"] is true ? "var(--accent)" : "#f66"); font-size: 0.9rem;">
+                    @msg
+                </div>
+            }
+
+            <div class="config-form">
+                <h4>Importar artículo JSON</h4>
+                <p style="color:var(--fg-muted);font-size:0.85rem;margin-bottom:2rem;">
+                    El archivo debe seguir el esquema <code style="color:var(--accent)">edu.univ.ingest.v1</code>.
+                    Si la fuente no existe, se creará automáticamente.
+                </p>
+                <form method="post" asp-page-handler="ImportJson" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label class="form-label">Archivo .json</label>
+                        <input type="file" name="jsonFile" accept=".json" class="form-control" />
+                    </div>
+                    <div>
+                        <button type="submit" class="btn-config-primary">Importar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     </main>
 
-    <!-- FOOTER (copiado de la landing) -->
     <footer>
         <div class="footer__logo">Flow<span>Press</span></div>
         <p class="footer__copy">SC-701 · Programación Avanzada Web · @DateTime.Now.Year</p>
     </footer>
 
-    <!-- Script para tabs y animaciones (vanilla) -->
     <script>
         // Tabs
         const tabs = document.querySelectorAll('.config-tab');
@@ -428,16 +502,18 @@
             });
         });
 
-        // Activar pestaña basada en hash al cargar
-        const hash = window.location.hash.substring(1); // quita '#'
-        if (hash === 'secrets') {
-            document.querySelector('[data-tab="secrets"]').click();
-        } else {
-            document.querySelector('[data-tab="roles"]').click();
-        }
+        const hash = window.location.hash.substring(1);
 
-        // Animaciones reveal (opcional, si quieres que los elementos aparezcan con scroll)
-        // (Puedes copiar el mismo script de animations.js si lo deseas)
+        // Activar pestaña basada en hash al cargar
+        if (hash === 'secrets') {
+            document.querySelector('[data-tab="secrets"]')?.click();
+        } else if (hash === 'destacados') {
+            document.querySelector('[data-tab="destacados"]')?.click();
+        } else if (hash === 'importar') {
+            document.querySelector('[data-tab="importar"]')?.click();
+        } else {
+            document.querySelector('[data-tab="roles"]')?.click();
+        }
     </script>
 
 

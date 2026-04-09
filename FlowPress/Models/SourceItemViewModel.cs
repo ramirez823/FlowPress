@@ -6,12 +6,14 @@ namespace FlowPress.Models;
 public class SourceItemViewModel
 {
     public Source? Source { get; set; }
+    public int SourceItemId { get; set; }
     public NormalizedContent? Normalized { get; set; }
     public SourceSchema? Schema { get; set; }
     public RawContent? Raw { get; set; }
 
     public SourceItemViewModel(SourceItem item)
     {
+        SourceItemId = item.Id;
         Source = item.Source;
         try
         {
@@ -34,7 +36,25 @@ public class SourceItemViewModel
         }
         catch { }
     }
+
+    public SourceItemViewModel(Source source, NormalizedContent normalized, RawContent raw)
+    {
+        SourceItemId = 0;
+        Source = source;
+        Normalized = normalized;
+        Raw = raw;
+        Schema = new SourceSchema
+        {
+            Id = source.Id.ToString(),
+            Name = source.Name,
+            Type = "api",
+            Url = source.Url,
+            RequiresSecret = source.RequiresSecret
+        };
+    }
 }
+
+
 
 public class NormalizedContent
 {

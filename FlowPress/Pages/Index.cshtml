@@ -72,72 +72,214 @@
         </div>
     </section>
 
-    <!-- ARTÍCULOS DESTACADOS -->
-    <section class="section" id="articles">
+
+
+    <!-- carrusel -->
+
+
+    @if (Model.NewsItems.Any())
+{
+    <section class="carousel-section" id="news">
         <div class="section__header">
             <div>
-                <p class="section__label">Últimas entradas</p>
-                <h2 class="section__title reveal">Artículos<br>destacados</h2>
+                <p class="section__label">En tiempo real</p>
+                <h2 class="section__title reveal">Últimas<br>noticias</h2>
             </div>
-            <a asp-page="/Account/Login" class="section__link">Ver todos →</a>
+            <span id="carousel-counter" style="font-size:0.8rem;color:var(--fg-muted);letter-spacing:0.1em;text-transform:uppercase;"></span>
         </div>
 
-        @if (Model.Items.Any())
-        {
-            <div class="articles-grid">
-                @{
-                    var first = Model.Items.First();
-                }
-                <div class="card card--featured reveal">
-                    <p class="card__category">@(first.Normalized?.Category?.Primary ?? "General")</p>
-                    <h3 class="card__title">@(first.Normalized?.Title ?? "Sin título")</h3>
-                    <p class="card__summary">@(first.Normalized?.Summary ?? first.Normalized?.Content?.Substring(0, Math.Min(200, first.Normalized?.Content?.Length ?? 0)))</p>
+        <div class="carousel-wrapper">
+            <div class="carousel-track" id="carouselTrack"></div>
+            <div class="carousel-progress" id="carouselProgress"></div>
+        </div>
+
+        <div class="carousel-controls">
+            <div class="carousel-indicators" id="carouselDots"></div>
+            <div class="carousel-nav">
+                <button class="carousel-btn" id="carouselPrev">←</button>
+                <button class="carousel-btn" id="carouselNext">→</button>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const newsItems = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+            Model.NewsItems.Select(i => new {
+                title    = i.Normalized?.Title ?? "Sin título",
+                summary  = i.Normalized?.Summary ?? i.Normalized?.Content ?? "",
+                category = i.Normalized?.Category?.Primary ?? "General",
+                source   = i.Source?.Name ?? i.Schema?.Name ?? "Fuente",
+                date     = i.Normalized?.PublishedAt.ToString("dd MMM yyyy"),
+                url      = i.Normalized?.Url ?? "#"
+            })
+        ));
+
+        const CARDS_PER_PAGE = 3;
+        const INTERVAL_MS    = 40000;
+        let currentPage      = 0;
+        let timer            = null;
+        let progressTimer    = null;
+        let progressStart    = null;
+
+        const track    = document.getElementById('carouselTrack');
+        const dots     = document.getElementById('carouselDots');
+        const progress = document.getElementById('carouselProgress');
+        const counter  = document.getElementById('carousel-counter');
+
+        const totalPages = Math.ceil(newsItems.length / CARDS_PER_PAGE);
+
+        function renderDots() {
+            dots.innerHTML = '';
+            for (let i = 0; i < totalPages; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'carousel-dot' + (i === currentPage ? ' active' : '');
+                dot.addEventListener('click', () => goTo(i));
+                dots.appendChild(dot);
+            }
+        }
+
+        function renderCards() {
+            track.classList.add('fading');
+            setTimeout(() => {
+                const start = currentPage * CARDS_PER_PAGE;
+                const items = newsItems.slice(start, start + CARDS_PER_PAGE);
+
+                track.innerHTML = items.map(item => `
+                    <a class="carousel-card" href="${item.url}" target="_blank" rel="noopener">
+                        <div>
+                            <p class="carousel-card__category">${item.category}</p>
+                            <h3 class="carousel-card__title">${item.title}</h3>
+                            ${item.summary ? `<p class="carousel-card__summary">${item.summary}</p>` : ''}
+                        </div>
+                        <div class="carousel-card__meta">
+                            <span>${item.source}</span>
+                            <span class="carousel-card__meta-dot"></span>
+                            <span>${item.date}</span>
+                        </div>
+                        <div class="carousel-card__accent-line"></div>
+                    </a>
+                `).join('');
+
+                counter.textContent = `${currentPage + 1} / ${totalPages}`;
+                track.classList.remove('fading');
+                renderDots();
+            }, 250);
+        }
+
+        function startProgress() {
+            progress.style.transition = 'none';
+            progress.style.width = '0%';
+            progressStart = Date.now();
+            requestAnimationFrame(function tick() {
+                const elapsed = Date.now() - progressStart;
+                const pct = Math.min((elapsed / INTERVAL_MS) * 100, 100);
+                progress.style.width = pct + '%';
+                if (pct < 100) requestAnimationFrame(tick);
+            });
+        }
+
+        function goTo(page) {
+            currentPage = (page + totalPages) % totalPages;
+            renderCards();
+            clearInterval(timer);
+            startProgress();
+            timer = setInterval(advance, INTERVAL_MS);
+        }
+
+        function advance() {
+            goTo(currentPage + 1);
+        }
+
+        document.getElementById('carouselPrev').addEventListener('click', () => goTo(currentPage - 1));
+        document.getElementById('carouselNext').addEventListener('click', () => goTo(currentPage + 1));
+
+        // Init
+        renderCards();
+        startProgress();
+        timer = setInterval(advance, INTERVAL_MS);
+    </script>
+}
+
+<!-- ARTÍCULOS DESTACADOS -->
+<section class="section" id="articles">
+    <div class="section__header">
+        <div>
+            <p class="section__label">Últimas entradas</p>
+            <h2 class="section__title reveal">Artículos<br>destacados</h2>
+        </div>
+        <a asp-area="Identity" asp-page="/Account/Login" class="section__link">Ver todos →</a>
+    </div>
+
+    @{
+            var displayItems = Model.FeaturedItems.Any()
+            ? Model.FeaturedItems
+            : null;
+    }
+
+    @if (displayItems is not null && displayItems.Any())
+    {
+        <div class="articles-grid">
+    @{
+        var first = displayItems.First();
+    }
+    <div class="card card--featured reveal">
+        <p class="card__category">@(first.Normalized?.Category?.Primary ?? "General")</p>
+        <h3 class="card__title">@(first.Normalized?.Title ?? "Sin título")</h3>
+        <p class="card__summary">@(first.Normalized?.Summary ?? first.Normalized?.Content?.Substring(0, Math.Min(200, first.Normalized?.Content?.Length ?? 0)))</p>
+        <div class="card__meta">
+            <span>@(first.Source?.Name ?? first.Schema?.Name ?? "Fuente")</span>
+            <span class="card__meta-dot"></span>
+            <span>@(first.Normalized?.PublishedAt.ToString("dd MMM yyyy"))</span>
+        </div>
+        @if (User.Identity?.IsAuthenticated == true && first.SourceItemId > 0)
+{
+    <a href="/Configuration/Index?handler=Export&id=@first.SourceItemId"
+       style="display:inline-block;margin-top:1rem;font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);">
+        ↓ Descargar JSON
+    </a>
+}
+        <div class="card__accent-line"></div>
+    </div>
+    @foreach (var item in displayItems.Skip(1).Take(4))
+    {
+        <div class="card reveal">
+            <p class="card__category">@(item.Normalized?.Category?.Primary ?? "General")</p>
+            <h3 class="card__title">@(item.Normalized?.Title ?? "Sin título")</h3>
+            <div class="card__meta">
+                <span>@(item.Source?.Name ?? item.Schema?.Name ?? "Fuente")</span>
+                <span class="card__meta-dot"></span>
+                <span>@(item.Normalized?.PublishedAt.ToString("dd MMM"))</span>
+            </div>
+            <div class="card__accent-line"></div>
+        </div>
+    }
+</div>
+    }
+    else
+    {
+        <div class="articles-grid">
+            @for (int i = 0; i < 5; i++)
+            {
+                <div class="card @(i == 0 ? "card--featured" : "") reveal">
+                    <p class="card__category">Tecnología</p>
+                    <h3 class="card__title">@(i == 0 ? "El futuro del periodismo digital está en la agregación inteligente de fuentes" : $"Artículo de ejemplo {i + 1}")</h3>
+                    @if (i == 0)
+                    {
+                        <p class="card__summary">Los nuevos sistemas de agregación permiten centralizar contenido de múltiples fuentes en tiempo real, transformando la forma en que consumimos información.</p>
+                    }
                     <div class="card__meta">
-                        <span>@(first.Source?.Name ?? "Fuente")</span>
+                        <span>Example News</span>
                         <span class="card__meta-dot"></span>
-                        <span>@(first.Normalized?.PublishedAt.ToString("dd MMM yyyy") ?? "")</span>
+                        <span>@DateTime.Now.ToString("dd MMM yyyy")</span>
                     </div>
                     <div class="card__accent-line"></div>
                 </div>
-                @foreach (var item in Model.Items.Skip(1).Take(4))
-                {
-                    <div class="card reveal">
-                        <p class="card__category">@(item.Normalized?.Category?.Primary ?? "General")</p>
-                        <h3 class="card__title">@(item.Normalized?.Title ?? "Sin título")</h3>
-                        <div class="card__meta">
-                            <span>@(item.Source?.Name ?? "Fuente")</span>
-                            <span class="card__meta-dot"></span>
-                            <span>@(item.Normalized?.PublishedAt.ToString("dd MMM") ?? "")</span>
-                        </div>
-                        <div class="card__accent-line"></div>
-                    </div>
-                }
-            </div>
-        }
-        else
-        {
-            <div class="articles-grid">
-                <!-- este contador solo es para el ejemplo, favor hacerlo bien y mantener el formato -->
-                @for (int i = 0; i < 5; i++)
-                {
-                    <div class="card @(i == 0 ? "card--featured" : "") reveal">
-                        <p class="card__category">Tecnología</p>
-                        <h3 class="card__title">@(i == 0 ? "El futuro del periodismo digital está en la agregación inteligente de fuentes" : $"Artículo de ejemplo {i + 1}")</h3>
-                        @if (i == 0)
-                        {
-                            <p class="card__summary">Los nuevos sistemas de agregación permiten centralizar contenido de múltiples fuentes en tiempo real, transformando la forma en que consumimos información.</p>
-                        }
-                        <div class="card__meta">
-                            <span>Example News</span>
-                            <span class="card__meta-dot"></span>
-                            <span>@DateTime.Now.ToString("dd MMM yyyy")</span>
-                        </div>
-                        <div class="card__accent-line"></div>
-                    </div>
-                }
-            </div>
-        }
-    </section>
+            }
+        </div>
+    }
+</section>
+
+
 
     <!-- CÓMO FUNCIONA -->
     <section class="section how-section" id="how">

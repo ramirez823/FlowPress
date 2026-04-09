@@ -1,27 +1,40 @@
 using FlowPress.Models;
 using FlowPress.Services.Interfaces;
+using FlowPress.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace FlowPress.Pages
+namespace FlowPress.Pages;
+
+public class IndexModel : PageModel
 {
-    public class IndexModel : PageModel
+    private readonly IContentService _contentService;
+    private readonly INewsAggregatorService _newsAggregator;
+    private readonly ISourceItemRepository _sourceItemRepo;
+
+    public IEnumerable<SourceItemViewModel> Items { get; set; } = [];
+    public IEnumerable<Source> Sources { get; set; } = [];
+    public List<SourceItemViewModel> NewsItems { get; set; } = [];
+    public List<SourceItemViewModel> FeaturedItems { get; set; } = [];
+
+    public IndexModel(
+        IContentService contentService,
+        INewsAggregatorService newsAggregator,
+        ISourceItemRepository sourceItemRepo)
     {
-        private readonly IContentService _contentService;
+        _contentService = contentService;
+        _newsAggregator = newsAggregator;
+        _sourceItemRepo = sourceItemRepo;
+    }
 
-        public IEnumerable<SourceItemViewModel> Items { get; set; } = [];
-        public IEnumerable<Source> Sources { get; set; } = [];
+    public async Task OnGetAsync()
+    {
+        Sources = await _contentService.GetAllSourcesAsync();
+        var rawItems = await _contentService.GetAllItemsAsync();
+        Items = rawItems.Select(i => new SourceItemViewModel(i)).ToList();
 
-        public IndexModel(IContentService contentService)
-        {
-            _contentService = contentService;
-        }
+        NewsItems = await _newsAggregator.GetLatestNewsAsync(12);
 
-        public async Task OnGetAsync()
-        {
-            Sources = await _contentService.GetAllSourcesAsync();
-
-            var rawItems = await _contentService.GetAllItemsAsync();
-            Items = rawItems.Select(i => new SourceItemViewModel(i)).ToList();
-        }
+        var featuredRaw = await _sourceItemRepo.GetFeaturedAsync();
+        FeaturedItems = featuredRaw.Select(i => new SourceItemViewModel(i)).ToList();
     }
 }

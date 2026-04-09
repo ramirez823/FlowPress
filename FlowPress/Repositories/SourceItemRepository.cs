@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FlowPress.Repositories;
 
-
 public class SourceItemRepository : ISourceItemRepository
 {
     private readonly ApplicationDbContext _context;
@@ -20,6 +19,12 @@ public class SourceItemRepository : ISourceItemRepository
 
     public async Task<SourceItem?> GetByIdAsync(int id) =>
         await _context.SourceItems.Include(i => i.Source).FirstOrDefaultAsync(i => i.Id == id);
+
+    public async Task<IEnumerable<SourceItem>> GetFeaturedAsync() =>
+        await _context.SourceItems
+            .Include(i => i.Source)
+            .Where(i => i.IsFeatured)
+            .ToListAsync();
 
     public async Task AddAsync(SourceItem item)
     {
@@ -36,4 +41,10 @@ public class SourceItemRepository : ISourceItemRepository
             await _context.SaveChangesAsync();
         }
     }
+
+    public async Task SaveChangesAsync() =>
+    await _context.SaveChangesAsync();
+
+    public void MarkAsModified(SourceItem item) =>
+        _context.Entry(item).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
 }

@@ -10,4 +10,7 @@ public class Source
     public string? Description { get; set; }
     public string ComponentType { get; set; } = string.Empty;
     public bool RequiresSecret { get; set; } = false;
+
+    public List<SourceItem> AllItems { get; set; } = new();
+
 }

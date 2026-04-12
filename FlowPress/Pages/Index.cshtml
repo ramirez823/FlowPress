@@ -138,6 +138,16 @@
                         cursor:pointer;">
                         ↓ Descargar JSON
                     </button>
+                    <button id="modal-btn-tts" onclick="toggleTTS()" style="
+    background:none;
+    border:1px solid #444;
+    color:#aaa;
+    font-size:0.85rem;
+    border-radius:4px;
+    cursor:pointer;
+    transition: border-color 0.2s, color 0.2s;">
+    ▶ Leer noticia
+</button>
                     <button onclick="closeNewsModal()" style="
                         padding:0.65rem 1.2rem;background:none;
                         border:1px solid #333;color:#666;
@@ -512,8 +522,68 @@
             document.body.style.overflow = 'hidden';
         }
 
+        // ── Text-to-Speech ────────────────────────────────────────
+const ttsBtn = document.getElementById('modal-btn-tts');
+
+// Ocultar el botón si el navegador no soporta TTS
+if (!window.speechSynthesis) {
+    if (ttsBtn) ttsBtn.style.display = 'none';
+}
+
+let ttsReading = false;
+
+function toggleTTS() {
+    if (ttsReading) {
+        stopTTS();
+    } else {
+        startTTS();
+    }
+}
+
+function startTTS() {
+    if (!currentModalItem || !window.speechSynthesis) return;
+
+    const text = [
+        currentModalItem.title || '',
+        currentModalItem.summary || ''
+    ].filter(Boolean).join('. ');
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = currentModalItem.language === 'en' ? 'en-US' : 'es-ES';
+    utterance.rate = 1;
+    utterance.pitch = 1;
+
+    utterance.onstart = () => {
+        ttsReading = true;
+        ttsBtn.textContent = '⏹ Detener';
+        ttsBtn.style.borderColor = '#b8860b';
+        ttsBtn.style.color = '#b8860b';
+    };
+
+    utterance.onend = () => resetTTSBtn();
+    utterance.onerror = () => resetTTSBtn();
+
+    window.speechSynthesis.cancel(); // limpiar cualquier lectura previa
+    window.speechSynthesis.speak(utterance);
+}
+
+function stopTTS() {
+    window.speechSynthesis.cancel();
+    resetTTSBtn();
+}
+
+function resetTTSBtn() {
+    ttsReading = false;
+    if (ttsBtn) {
+        ttsBtn.textContent = '▶ Leer noticia';
+        ttsBtn.style.borderColor = '#444';
+        ttsBtn.style.color = '#aaa';
+    }
+}
+
         // ── Cerrar modal ──────────────────────────────────────────────
         function closeNewsModal() {
+            stopTTS()
             document.getElementById('newsModal').style.display = 'none';
             document.body.style.overflow = '';
             currentModalItem = null;

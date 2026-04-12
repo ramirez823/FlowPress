@@ -94,12 +94,14 @@
             position:relative;
             box-shadow:0 0 60px rgba(0,0,0,0.8);
         ">
+            <!-- Barra dorada superior -->
             <div style="height:3px;background:#b8860b;border-radius:8px 8px 0 0;"></div>
 
-            <!-- Imagen de la noticia -->
+            <!-- Imagen -->
             <img id="modal-image" src="" alt=""
                  style="width:100%;max-height:240px;object-fit:cover;display:none;" />
 
+            <!-- Header -->
             <div style="padding:1.5rem 1.5rem 0.5rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;">
                 <div>
                     <p id="modal-category" style="font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:#b8860b;margin:0 0 0.4rem;"></p>
@@ -108,6 +110,7 @@
                 <button onclick="closeNewsModal()" style="background:none;border:none;color:#666;font-size:1.4rem;cursor:pointer;padding:0;line-height:1;flex-shrink:0;margin-top:2px;">✕</button>
             </div>
 
+            <!-- Body -->
             <div style="padding:1rem 1.5rem 1.5rem;">
                 <p id="modal-summary" style="color:#aaa;line-height:1.75;font-size:0.95rem;margin:0 0 1.25rem;"></p>
                 <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1.5rem;">
@@ -115,6 +118,8 @@
                     <span style="color:#333;">·</span>
                     <span id="modal-date" style="font-size:0.75rem;color:#555;"></span>
                 </div>
+
+                <!-- Botones -->
                 <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
                     <a id="modal-link" href="#" target="_blank" rel="noopener" style="
                         display:inline-block;padding:0.65rem 1.4rem;
@@ -123,9 +128,19 @@
                         text-decoration:none;border-radius:4px;">
                         Ver noticia completa →
                     </a>
+                    <button id="modal-btn-download" onclick="downloadArticleJson()" style="
+                        padding:0.65rem 1.2rem;
+                        background:none;
+                        border:1px solid #444;
+                        color:#aaa;
+                        font-size:0.85rem;
+                        border-radius:4px;
+                        cursor:pointer;">
+                        ↓ Descargar JSON
+                    </button>
                     <button onclick="closeNewsModal()" style="
                         padding:0.65rem 1.2rem;background:none;
-                        border:1px solid #333;color:#888;
+                        border:1px solid #333;color:#666;
                         font-size:0.85rem;border-radius:4px;cursor:pointer;">
                         Cerrar
                     </button>
@@ -167,7 +182,18 @@
                     source   = i.Source?.Name ?? i.Schema?.Name ?? "Fuente",
                     date     = i.Normalized?.PublishedAt.ToString("dd MMM yyyy"),
                     url      = i.Normalized?.Url ?? "#",
-                    image    = i.Normalized?.ImageUrl ?? ""
+                    image    = i.Normalized?.ImageUrl ?? "",
+                    // Campos extra para el JSON de exportación
+                    sourceId       = i.Source?.Id.ToString() ?? "",
+                    sourceUrl      = i.Source?.Url ?? "",
+                    requiresSecret = i.Source?.RequiresSecret ?? false,
+                    externalId     = i.Normalized?.ExternalId ?? "",
+                    content        = i.Normalized?.Content ?? "",
+                    author         = i.Normalized?.Author ?? "",
+                    language       = i.Normalized?.Language ?? "",
+                    publishedAt    = i.Normalized?.PublishedAt.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                    secondaryCategories = i.Normalized?.Category?.Secondary ?? new List<string>(),
+                    sourceItemId   = i.SourceItemId  // 0 si viene de API, >0 si está en BD
                 })
             ));
 
@@ -198,7 +224,6 @@
                 setTimeout(() => {
                     const start = currentPage * CARDS_PER_PAGE;
                     const items = newsItems.slice(start, start + CARDS_PER_PAGE);
-
                     track.innerHTML = '';
 
                     items.forEach((item, idx) => {
@@ -305,7 +330,8 @@
                      data-source="@Html.Encode(first.Source?.Name ?? first.Schema?.Name ?? "Fuente")"
                      data-date="@first.Normalized?.PublishedAt.ToString("dd MMM yyyy")"
                      data-url="@Html.Encode(first.Normalized?.Url ?? "#")"
-                     data-image="@Html.Encode(first.Normalized?.ImageUrl ?? "")">
+                     data-image="@Html.Encode(first.Normalized?.ImageUrl ?? "")"
+                     data-source-item-id="@first.SourceItemId">
                     <p class="card__category">@(first.Normalized?.Category?.Primary ?? "General")</p>
                     <h3 class="card__title">@(first.Normalized?.Title ?? "Sin título")</h3>
                     <p class="card__summary">@(first.Normalized?.Summary ?? first.Normalized?.Content?.Substring(0, Math.Min(200, first.Normalized?.Content?.Length ?? 0)))</p>
@@ -314,14 +340,6 @@
                         <span class="card__meta-dot"></span>
                         <span>@(first.Normalized?.PublishedAt.ToString("dd MMM yyyy"))</span>
                     </div>
-                    @if (User.Identity?.IsAuthenticated == true && first.SourceItemId > 0)
-                    {
-                        <a href="/Configuration/Index?handler=Export&id=@first.SourceItemId"
-                           onclick="event.stopPropagation()"
-                           style="display:inline-block;margin-top:1rem;font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);">
-                            ↓ Descargar JSON
-                        </a>
-                    }
                     <div class="card__accent-line"></div>
                 </div>
 
@@ -334,7 +352,8 @@
                          data-source="@Html.Encode(item.Source?.Name ?? item.Schema?.Name ?? "Fuente")"
                          data-date="@item.Normalized?.PublishedAt.ToString("dd MMM")"
                          data-url="@Html.Encode(item.Normalized?.Url ?? "#")"
-                         data-image="@Html.Encode(item.Normalized?.ImageUrl ?? "")">
+                         data-image="@Html.Encode(item.Normalized?.ImageUrl ?? "")"
+                         data-source-item-id="@item.SourceItemId">
                         <p class="card__category">@(item.Normalized?.Category?.Primary ?? "General")</p>
                         <h3 class="card__title">@(item.Normalized?.Title ?? "Sin título")</h3>
                         <div class="card__meta">
@@ -465,8 +484,13 @@
     <script src="~/js/animations.js"></script>
 
     <script>
-        // ── Modal ─────────────────────────────────────────────────────
+        // ── Estado del modal ──────────────────────────────────────────
+        let currentModalItem = null;
+
+        // ── Abrir modal ───────────────────────────────────────────────
         function openNewsModal(item) {
+            currentModalItem = item;
+
             document.getElementById('modal-title').textContent    = item.title    || 'Sin título';
             document.getElementById('modal-summary').textContent  = item.summary  || 'Sin descripción disponible.';
             document.getElementById('modal-category').textContent = item.category || '';
@@ -474,7 +498,6 @@
             document.getElementById('modal-date').textContent     = item.date     || '';
             document.getElementById('modal-link').href            = item.url      || '#';
 
-            // Imagen
             const imgEl = document.getElementById('modal-image');
             if (item.image) {
                 imgEl.src           = item.image;
@@ -489,32 +512,91 @@
             document.body.style.overflow = 'hidden';
         }
 
+        // ── Cerrar modal ──────────────────────────────────────────────
         function closeNewsModal() {
             document.getElementById('newsModal').style.display = 'none';
             document.body.style.overflow = '';
+            currentModalItem = null;
         }
 
-        // Cerrar al hacer click en el fondo
+        // ── Descargar JSON ────────────────────────────────────────────
+        async function downloadArticleJson() {
+            if (!currentModalItem) return;
+
+            const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+
+            // Artículo destacado — tiene ID en BD, el backend arma el JSON completo
+            if (currentModalItem.sourceItemId && currentModalItem.sourceItemId > 0) {
+                const url = `?handler=ExportArticle&id=${currentModalItem.sourceItemId}`;
+                const a   = document.createElement('a');
+                a.href     = url;
+                a.download = `article_${currentModalItem.sourceItemId}_${date}.json`;
+                a.click();
+                return;
+            }
+
+            // Artículo del carrusel — viene de API, armamos el JSON en el cliente
+            const payload = {
+                schemaVersion: "edu.univ.ingest.v1",
+                exportedAt: new Date().toISOString(),
+                source: {
+                    id:             currentModalItem.sourceId       || null,
+                    name:           currentModalItem.source         || null,
+                    type:           "api",
+                    url:            currentModalItem.sourceUrl      || null,
+                    requiresSecret: currentModalItem.requiresSecret || false
+                },
+                normalized: {
+                    id:          null,
+                    externalId:  currentModalItem.externalId  || null,
+                    title:       currentModalItem.title        || null,
+                    content:     currentModalItem.content      || null,
+                    summary:     currentModalItem.summary      || null,
+                    publishedAt: currentModalItem.publishedAt  || null,
+                    url:         currentModalItem.url          || null,
+                    author:      currentModalItem.author       || null,
+                    language:    currentModalItem.language     || null,
+                    category: {
+                        primary:   currentModalItem.category            || null,
+                        secondary: currentModalItem.secondaryCategories || []
+                    }
+                },
+                raw: {
+                    format: "json",
+                    data: { note: "Raw data no disponible para artículos en tiempo real." }
+                }
+            };
+
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href     = blobUrl;
+            a.download = `article_${date}.json`;
+            a.click();
+            URL.revokeObjectURL(blobUrl);
+        }
+
+        // ── Cerrar con fondo o Escape ─────────────────────────────────
         document.getElementById('newsModal').addEventListener('click', function(e) {
             if (e.target === this) closeNewsModal();
         });
 
-        // Cerrar con Escape
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') closeNewsModal();
         });
 
-        // Cards de artículos destacados
+        // ── Cards de artículos destacados ─────────────────────────────
         document.querySelectorAll('.news-card').forEach(card => {
             card.addEventListener('click', () => {
                 openNewsModal({
-                    title:    card.dataset.title,
-                    summary:  card.dataset.summary,
-                    category: card.dataset.category,
-                    source:   card.dataset.source,
-                    date:     card.dataset.date,
-                    url:      card.dataset.url,
-                    image:    card.dataset.image
+                    title:          card.dataset.title,
+                    summary:        card.dataset.summary,
+                    category:       card.dataset.category,
+                    source:         card.dataset.source,
+                    date:           card.dataset.date,
+                    url:            card.dataset.url,
+                    image:          card.dataset.image,
+                    sourceItemId:   parseInt(card.dataset.sourceItemId || '0')
                 });
             });
         });

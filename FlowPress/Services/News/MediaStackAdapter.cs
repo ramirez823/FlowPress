@@ -52,7 +52,8 @@ public class MediaStackAdapter : INewsAdapter
                     Primary = article.TryGetProperty("category", out var cat)
                         ? cat.GetString() ?? "general"
                         : "general"
-                }
+                },
+                ImageUrl = article.TryGetProperty("image", out var img) ? img.GetString() : null
             };
 
             var raw = new RawContent

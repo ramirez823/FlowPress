@@ -58,7 +58,7 @@ public class NewsSourcesSeedService : IHostedService
                     ComponentType = "API",
                     RequiresSecret = true
                 },
-                ApiKey = "pub_4105e78854f545e68c65df96184ac2ba"
+                ApiKey = "pub_eb27dbe18865443abc7184c0a3e8e70d"
             },
             new
             {
@@ -70,7 +70,7 @@ public class NewsSourcesSeedService : IHostedService
                     ComponentType = "API",
                     RequiresSecret = true
                 },
-                ApiKey = "351636d4c0f841a62ebaaea8e257adef"
+                ApiKey = "375703a4e080d859d9fcc2fe8e198b9d"
             }
         };
 

@@ -51,7 +51,8 @@ public class NewsApiAdapter : INewsAdapter
                     ? DateTime.Parse(pub.GetString()!)
                     : DateTime.UtcNow,
                 Language = "es",
-                Category = new CategoryInfo { Primary = "general" }
+                Category = new CategoryInfo { Primary = "general" },
+                ImageUrl = article.TryGetProperty("urlToImage", out var img) ? img.GetString() : null
             };
 
             var raw = new RawContent { Format = "json", Data = article };

@@ -72,214 +72,304 @@
         </div>
     </section>
 
+    <!-- MODAL PREVIEW DE NOTICIA -->
+    <div id="newsModal" style="
+        display:none;
+        position:fixed;
+        inset:0;
+        z-index:9999;
+        background:rgba(0,0,0,0.75);
+        backdrop-filter:blur(4px);
+        align-items:center;
+        justify-content:center;
+    ">
+        <div style="
+            background:#111;
+            border:1px solid #2a2a2a;
+            border-radius:8px;
+            max-width:680px;
+            width:90%;
+            max-height:85vh;
+            overflow-y:auto;
+            position:relative;
+            box-shadow:0 0 60px rgba(0,0,0,0.8);
+        ">
+            <div style="height:3px;background:#b8860b;border-radius:8px 8px 0 0;"></div>
 
+            <!-- Imagen de la noticia -->
+            <img id="modal-image" src="" alt=""
+                 style="width:100%;max-height:240px;object-fit:cover;display:none;" />
 
-    <!-- carrusel -->
-
-
-    @if (Model.NewsItems.Any())
-{
-    <section class="carousel-section" id="news">
-        <div class="section__header">
-            <div>
-                <p class="section__label">En tiempo real</p>
-                <h2 class="section__title reveal">Últimas<br>noticias</h2>
+            <div style="padding:1.5rem 1.5rem 0.5rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;">
+                <div>
+                    <p id="modal-category" style="font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:#b8860b;margin:0 0 0.4rem;"></p>
+                    <h2 id="modal-title" style="font-size:1.3rem;font-weight:700;color:#fff;margin:0;line-height:1.4;"></h2>
+                </div>
+                <button onclick="closeNewsModal()" style="background:none;border:none;color:#666;font-size:1.4rem;cursor:pointer;padding:0;line-height:1;flex-shrink:0;margin-top:2px;">✕</button>
             </div>
-            <span id="carousel-counter" style="font-size:0.8rem;color:var(--fg-muted);letter-spacing:0.1em;text-transform:uppercase;"></span>
-        </div>
 
-        <div class="carousel-wrapper">
-            <div class="carousel-track" id="carouselTrack"></div>
-            <div class="carousel-progress" id="carouselProgress"></div>
-        </div>
-
-        <div class="carousel-controls">
-            <div class="carousel-indicators" id="carouselDots"></div>
-            <div class="carousel-nav">
-                <button class="carousel-btn" id="carouselPrev">←</button>
-                <button class="carousel-btn" id="carouselNext">→</button>
-            </div>
-        </div>
-    </section>
-
-    <script>
-        const newsItems = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-            Model.NewsItems.Select(i => new {
-                title    = i.Normalized?.Title ?? "Sin título",
-                summary  = i.Normalized?.Summary ?? i.Normalized?.Content ?? "",
-                category = i.Normalized?.Category?.Primary ?? "General",
-                source   = i.Source?.Name ?? i.Schema?.Name ?? "Fuente",
-                date     = i.Normalized?.PublishedAt.ToString("dd MMM yyyy"),
-                url      = i.Normalized?.Url ?? "#"
-            })
-        ));
-
-        const CARDS_PER_PAGE = 3;
-        const INTERVAL_MS    = 40000;
-        let currentPage      = 0;
-        let timer            = null;
-        let progressTimer    = null;
-        let progressStart    = null;
-
-        const track    = document.getElementById('carouselTrack');
-        const dots     = document.getElementById('carouselDots');
-        const progress = document.getElementById('carouselProgress');
-        const counter  = document.getElementById('carousel-counter');
-
-        const totalPages = Math.ceil(newsItems.length / CARDS_PER_PAGE);
-
-        function renderDots() {
-            dots.innerHTML = '';
-            for (let i = 0; i < totalPages; i++) {
-                const dot = document.createElement('div');
-                dot.className = 'carousel-dot' + (i === currentPage ? ' active' : '');
-                dot.addEventListener('click', () => goTo(i));
-                dots.appendChild(dot);
-            }
-        }
-
-        function renderCards() {
-            track.classList.add('fading');
-            setTimeout(() => {
-                const start = currentPage * CARDS_PER_PAGE;
-                const items = newsItems.slice(start, start + CARDS_PER_PAGE);
-
-                track.innerHTML = items.map(item => `
-                    <a class="carousel-card" href="${item.url}" target="_blank" rel="noopener">
-                        <div>
-                            <p class="carousel-card__category">${item.category}</p>
-                            <h3 class="carousel-card__title">${item.title}</h3>
-                            ${item.summary ? `<p class="carousel-card__summary">${item.summary}</p>` : ''}
-                        </div>
-                        <div class="carousel-card__meta">
-                            <span>${item.source}</span>
-                            <span class="carousel-card__meta-dot"></span>
-                            <span>${item.date}</span>
-                        </div>
-                        <div class="carousel-card__accent-line"></div>
+            <div style="padding:1rem 1.5rem 1.5rem;">
+                <p id="modal-summary" style="color:#aaa;line-height:1.75;font-size:0.95rem;margin:0 0 1.25rem;"></p>
+                <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1.5rem;">
+                    <span id="modal-source" style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:#555;"></span>
+                    <span style="color:#333;">·</span>
+                    <span id="modal-date" style="font-size:0.75rem;color:#555;"></span>
+                </div>
+                <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+                    <a id="modal-link" href="#" target="_blank" rel="noopener" style="
+                        display:inline-block;padding:0.65rem 1.4rem;
+                        background:#b8860b;color:#000;font-weight:700;
+                        font-size:0.85rem;letter-spacing:0.05em;
+                        text-decoration:none;border-radius:4px;">
+                        Ver noticia completa →
                     </a>
-                `).join('');
+                    <button onclick="closeNewsModal()" style="
+                        padding:0.65rem 1.2rem;background:none;
+                        border:1px solid #333;color:#888;
+                        font-size:0.85rem;border-radius:4px;cursor:pointer;">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                counter.textContent = `${currentPage + 1} / ${totalPages}`;
-                track.classList.remove('fading');
-                renderDots();
-            }, 250);
-        }
+    <!-- CARRUSEL -->
+    @if (Model.NewsItems.Any())
+    {
+        <section class="carousel-section" id="news">
+            <div class="section__header">
+                <div>
+                    <p class="section__label">En tiempo real</p>
+                    <h2 class="section__title reveal">Últimas<br>noticias</h2>
+                </div>
+                <span id="carousel-counter" style="font-size:0.8rem;color:var(--fg-muted);letter-spacing:0.1em;text-transform:uppercase;"></span>
+            </div>
+            <div class="carousel-wrapper">
+                <div class="carousel-track" id="carouselTrack"></div>
+                <div class="carousel-progress" id="carouselProgress"></div>
+            </div>
+            <div class="carousel-controls">
+                <div class="carousel-indicators" id="carouselDots"></div>
+                <div class="carousel-nav">
+                    <button class="carousel-btn" id="carouselPrev">←</button>
+                    <button class="carousel-btn" id="carouselNext">→</button>
+                </div>
+            </div>
+        </section>
 
-        function startProgress() {
-            progress.style.transition = 'none';
-            progress.style.width = '0%';
-            progressStart = Date.now();
-            requestAnimationFrame(function tick() {
-                const elapsed = Date.now() - progressStart;
-                const pct = Math.min((elapsed / INTERVAL_MS) * 100, 100);
-                progress.style.width = pct + '%';
-                if (pct < 100) requestAnimationFrame(tick);
-            });
-        }
+        <script>
+            const newsItems = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                Model.NewsItems.Select(i => new {
+                    title    = i.Normalized?.Title ?? "Sin título",
+                    summary  = i.Normalized?.Summary ?? i.Normalized?.Content ?? "",
+                    category = i.Normalized?.Category?.Primary ?? "General",
+                    source   = i.Source?.Name ?? i.Schema?.Name ?? "Fuente",
+                    date     = i.Normalized?.PublishedAt.ToString("dd MMM yyyy"),
+                    url      = i.Normalized?.Url ?? "#",
+                    image    = i.Normalized?.ImageUrl ?? ""
+                })
+            ));
 
-        function goTo(page) {
-            currentPage = (page + totalPages) % totalPages;
+            const CARDS_PER_PAGE = 3;
+            const INTERVAL_MS    = 40000;
+            let currentPage      = 0;
+            let timer            = null;
+            let progressStart    = null;
+
+            const track      = document.getElementById('carouselTrack');
+            const dots       = document.getElementById('carouselDots');
+            const progress   = document.getElementById('carouselProgress');
+            const counter    = document.getElementById('carousel-counter');
+            const totalPages = Math.ceil(newsItems.length / CARDS_PER_PAGE);
+
+            function renderDots() {
+                dots.innerHTML = '';
+                for (let i = 0; i < totalPages; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'carousel-dot' + (i === currentPage ? ' active' : '');
+                    dot.addEventListener('click', () => goTo(i));
+                    dots.appendChild(dot);
+                }
+            }
+
+            function renderCards() {
+                track.classList.add('fading');
+                setTimeout(() => {
+                    const start = currentPage * CARDS_PER_PAGE;
+                    const items = newsItems.slice(start, start + CARDS_PER_PAGE);
+
+                    track.innerHTML = '';
+
+                    items.forEach((item, idx) => {
+                        const globalIdx = start + idx;
+                        const card = document.createElement('div');
+                        card.className = 'carousel-card';
+                        card.style.cursor = 'pointer';
+
+                        const catEl = document.createElement('p');
+                        catEl.className = 'carousel-card__category';
+                        catEl.textContent = item.category;
+
+                        const titleEl = document.createElement('h3');
+                        titleEl.className = 'carousel-card__title';
+                        titleEl.textContent = item.title;
+
+                        const bodyDiv = document.createElement('div');
+                        bodyDiv.appendChild(catEl);
+                        bodyDiv.appendChild(titleEl);
+
+                        if (item.summary) {
+                            const summaryEl = document.createElement('p');
+                            summaryEl.className = 'carousel-card__summary';
+                            summaryEl.textContent = item.summary;
+                            bodyDiv.appendChild(summaryEl);
+                        }
+
+                        const metaDiv = document.createElement('div');
+                        metaDiv.className = 'carousel-card__meta';
+                        metaDiv.innerHTML = `<span>${item.source}</span><span class="carousel-card__meta-dot"></span><span>${item.date}</span>`;
+
+                        const accentLine = document.createElement('div');
+                        accentLine.className = 'carousel-card__accent-line';
+
+                        card.appendChild(bodyDiv);
+                        card.appendChild(metaDiv);
+                        card.appendChild(accentLine);
+
+                        card.addEventListener('click', () => openNewsModal(newsItems[globalIdx]));
+                        track.appendChild(card);
+                    });
+
+                    counter.textContent = `${currentPage + 1} / ${totalPages}`;
+                    track.classList.remove('fading');
+                    renderDots();
+                }, 250);
+            }
+
+            function startProgress() {
+                progress.style.transition = 'none';
+                progress.style.width = '0%';
+                progressStart = Date.now();
+                requestAnimationFrame(function tick() {
+                    const elapsed = Date.now() - progressStart;
+                    const pct = Math.min((elapsed / INTERVAL_MS) * 100, 100);
+                    progress.style.width = pct + '%';
+                    if (pct < 100) requestAnimationFrame(tick);
+                });
+            }
+
+            function goTo(page) {
+                currentPage = (page + totalPages) % totalPages;
+                renderCards();
+                clearInterval(timer);
+                startProgress();
+                timer = setInterval(advance, INTERVAL_MS);
+            }
+
+            function advance() { goTo(currentPage + 1); }
+
+            document.getElementById('carouselPrev').addEventListener('click', () => goTo(currentPage - 1));
+            document.getElementById('carouselNext').addEventListener('click', () => goTo(currentPage + 1));
+
             renderCards();
-            clearInterval(timer);
             startProgress();
             timer = setInterval(advance, INTERVAL_MS);
-        }
-
-        function advance() {
-            goTo(currentPage + 1);
-        }
-
-        document.getElementById('carouselPrev').addEventListener('click', () => goTo(currentPage - 1));
-        document.getElementById('carouselNext').addEventListener('click', () => goTo(currentPage + 1));
-
-        // Init
-        renderCards();
-        startProgress();
-        timer = setInterval(advance, INTERVAL_MS);
-    </script>
-}
-
-<!-- ARTÍCULOS DESTACADOS -->
-<section class="section" id="articles">
-    <div class="section__header">
-        <div>
-            <p class="section__label">Últimas entradas</p>
-            <h2 class="section__title reveal">Artículos<br>destacados</h2>
-        </div>
-        <a asp-area="Identity" asp-page="/Account/Login" class="section__link">Ver todos →</a>
-    </div>
-
-    @{
-            var displayItems = Model.FeaturedItems.Any()
-            ? Model.FeaturedItems
-            : null;
+        </script>
     }
 
-    @if (displayItems is not null && displayItems.Any())
-    {
-        <div class="articles-grid">
-    @{
-        var first = displayItems.First();
-    }
-    <div class="card card--featured reveal">
-        <p class="card__category">@(first.Normalized?.Category?.Primary ?? "General")</p>
-        <h3 class="card__title">@(first.Normalized?.Title ?? "Sin título")</h3>
-        <p class="card__summary">@(first.Normalized?.Summary ?? first.Normalized?.Content?.Substring(0, Math.Min(200, first.Normalized?.Content?.Length ?? 0)))</p>
-        <div class="card__meta">
-            <span>@(first.Source?.Name ?? first.Schema?.Name ?? "Fuente")</span>
-            <span class="card__meta-dot"></span>
-            <span>@(first.Normalized?.PublishedAt.ToString("dd MMM yyyy"))</span>
-        </div>
-        @if (User.Identity?.IsAuthenticated == true && first.SourceItemId > 0)
-{
-    <a href="/Configuration/Index?handler=Export&id=@first.SourceItemId"
-       style="display:inline-block;margin-top:1rem;font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);">
-        ↓ Descargar JSON
-    </a>
-}
-        <div class="card__accent-line"></div>
-    </div>
-    @foreach (var item in displayItems.Skip(1).Take(4))
-    {
-        <div class="card reveal">
-            <p class="card__category">@(item.Normalized?.Category?.Primary ?? "General")</p>
-            <h3 class="card__title">@(item.Normalized?.Title ?? "Sin título")</h3>
-            <div class="card__meta">
-                <span>@(item.Source?.Name ?? item.Schema?.Name ?? "Fuente")</span>
-                <span class="card__meta-dot"></span>
-                <span>@(item.Normalized?.PublishedAt.ToString("dd MMM"))</span>
+    <!-- ARTÍCULOS DESTACADOS -->
+    <section class="section" id="articles">
+        <div class="section__header">
+            <div>
+                <p class="section__label">Últimas entradas</p>
+                <h2 class="section__title reveal">Artículos<br>destacados</h2>
             </div>
-            <div class="card__accent-line"></div>
+            <a asp-area="Identity" asp-page="/Account/Login" class="section__link">Ver todos →</a>
         </div>
-    }
-</div>
-    }
-    else
-    {
-        <div class="articles-grid">
-            @for (int i = 0; i < 5; i++)
-            {
-                <div class="card @(i == 0 ? "card--featured" : "") reveal">
-                    <p class="card__category">Tecnología</p>
-                    <h3 class="card__title">@(i == 0 ? "El futuro del periodismo digital está en la agregación inteligente de fuentes" : $"Artículo de ejemplo {i + 1}")</h3>
-                    @if (i == 0)
-                    {
-                        <p class="card__summary">Los nuevos sistemas de agregación permiten centralizar contenido de múltiples fuentes en tiempo real, transformando la forma en que consumimos información.</p>
-                    }
+
+        @{
+            var displayItems = Model.FeaturedItems.Any() ? Model.FeaturedItems : null;
+        }
+
+        @if (displayItems is not null && displayItems.Any())
+        {
+            <div class="articles-grid">
+                @{
+                    var first = displayItems.First();
+                }
+                <div class="card card--featured reveal news-card" style="cursor:pointer;"
+                     data-title="@Html.Encode(first.Normalized?.Title ?? "Sin título")"
+                     data-summary="@Html.Encode(first.Normalized?.Summary ?? first.Normalized?.Content?.Substring(0, Math.Min(200, first.Normalized?.Content?.Length ?? 0)) ?? "")"
+                     data-category="@Html.Encode(first.Normalized?.Category?.Primary ?? "General")"
+                     data-source="@Html.Encode(first.Source?.Name ?? first.Schema?.Name ?? "Fuente")"
+                     data-date="@first.Normalized?.PublishedAt.ToString("dd MMM yyyy")"
+                     data-url="@Html.Encode(first.Normalized?.Url ?? "#")"
+                     data-image="@Html.Encode(first.Normalized?.ImageUrl ?? "")">
+                    <p class="card__category">@(first.Normalized?.Category?.Primary ?? "General")</p>
+                    <h3 class="card__title">@(first.Normalized?.Title ?? "Sin título")</h3>
+                    <p class="card__summary">@(first.Normalized?.Summary ?? first.Normalized?.Content?.Substring(0, Math.Min(200, first.Normalized?.Content?.Length ?? 0)))</p>
                     <div class="card__meta">
-                        <span>Example News</span>
+                        <span>@(first.Source?.Name ?? first.Schema?.Name ?? "Fuente")</span>
                         <span class="card__meta-dot"></span>
-                        <span>@DateTime.Now.ToString("dd MMM yyyy")</span>
+                        <span>@(first.Normalized?.PublishedAt.ToString("dd MMM yyyy"))</span>
                     </div>
+                    @if (User.Identity?.IsAuthenticated == true && first.SourceItemId > 0)
+                    {
+                        <a href="/Configuration/Index?handler=Export&id=@first.SourceItemId"
+                           onclick="event.stopPropagation()"
+                           style="display:inline-block;margin-top:1rem;font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);">
+                            ↓ Descargar JSON
+                        </a>
+                    }
                     <div class="card__accent-line"></div>
                 </div>
-            }
-        </div>
-    }
-</section>
 
-
+                @foreach (var item in displayItems.Skip(1).Take(4))
+                {
+                    <div class="card reveal news-card" style="cursor:pointer;"
+                         data-title="@Html.Encode(item.Normalized?.Title ?? "Sin título")"
+                         data-summary="@Html.Encode(item.Normalized?.Summary ?? item.Normalized?.Content?.Substring(0, Math.Min(200, item.Normalized?.Content?.Length ?? 0)) ?? "")"
+                         data-category="@Html.Encode(item.Normalized?.Category?.Primary ?? "General")"
+                         data-source="@Html.Encode(item.Source?.Name ?? item.Schema?.Name ?? "Fuente")"
+                         data-date="@item.Normalized?.PublishedAt.ToString("dd MMM")"
+                         data-url="@Html.Encode(item.Normalized?.Url ?? "#")"
+                         data-image="@Html.Encode(item.Normalized?.ImageUrl ?? "")">
+                        <p class="card__category">@(item.Normalized?.Category?.Primary ?? "General")</p>
+                        <h3 class="card__title">@(item.Normalized?.Title ?? "Sin título")</h3>
+                        <div class="card__meta">
+                            <span>@(item.Source?.Name ?? item.Schema?.Name ?? "Fuente")</span>
+                            <span class="card__meta-dot"></span>
+                            <span>@(item.Normalized?.PublishedAt.ToString("dd MMM"))</span>
+                        </div>
+                        <div class="card__accent-line"></div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="articles-grid">
+                @for (int i = 0; i < 5; i++)
+                {
+                    <div class="card @(i == 0 ? "card--featured" : "") reveal">
+                        <p class="card__category">Tecnología</p>
+                        <h3 class="card__title">@(i == 0 ? "El futuro del periodismo digital está en la agregación inteligente de fuentes" : $"Artículo de ejemplo {i + 1}")</h3>
+                        @if (i == 0)
+                        {
+                            <p class="card__summary">Los nuevos sistemas de agregación permiten centralizar contenido de múltiples fuentes en tiempo real, transformando la forma en que consumimos información.</p>
+                        }
+                        <div class="card__meta">
+                            <span>Example News</span>
+                            <span class="card__meta-dot"></span>
+                            <span>@DateTime.Now.ToString("dd MMM yyyy")</span>
+                        </div>
+                        <div class="card__accent-line"></div>
+                    </div>
+                }
+            </div>
+        }
+    </section>
 
     <!-- CÓMO FUNCIONA -->
     <section class="section how-section" id="how">
@@ -373,5 +463,61 @@
     </footer>
 
     <script src="~/js/animations.js"></script>
+
+    <script>
+        // ── Modal ─────────────────────────────────────────────────────
+        function openNewsModal(item) {
+            document.getElementById('modal-title').textContent    = item.title    || 'Sin título';
+            document.getElementById('modal-summary').textContent  = item.summary  || 'Sin descripción disponible.';
+            document.getElementById('modal-category').textContent = item.category || '';
+            document.getElementById('modal-source').textContent   = (item.source  || '').toUpperCase();
+            document.getElementById('modal-date').textContent     = item.date     || '';
+            document.getElementById('modal-link').href            = item.url      || '#';
+
+            // Imagen
+            const imgEl = document.getElementById('modal-image');
+            if (item.image) {
+                imgEl.src           = item.image;
+                imgEl.style.display = 'block';
+            } else {
+                imgEl.src           = '';
+                imgEl.style.display = 'none';
+            }
+
+            const modal = document.getElementById('newsModal');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeNewsModal() {
+            document.getElementById('newsModal').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+
+        // Cerrar al hacer click en el fondo
+        document.getElementById('newsModal').addEventListener('click', function(e) {
+            if (e.target === this) closeNewsModal();
+        });
+
+        // Cerrar con Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeNewsModal();
+        });
+
+        // Cards de artículos destacados
+        document.querySelectorAll('.news-card').forEach(card => {
+            card.addEventListener('click', () => {
+                openNewsModal({
+                    title:    card.dataset.title,
+                    summary:  card.dataset.summary,
+                    category: card.dataset.category,
+                    source:   card.dataset.source,
+                    date:     card.dataset.date,
+                    url:      card.dataset.url,
+                    image:    card.dataset.image
+                });
+            });
+        });
+    </script>
 </body>
 </html>

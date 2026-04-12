@@ -63,7 +63,8 @@ public class NewsDataAdapter : INewsAdapter
                     ? DateTime.Parse(pub.GetString()!)
                     : DateTime.UtcNow,
                 Language = "es",
-                Category = new CategoryInfo { Primary = primaryCategory ?? "general" }
+                Category = new CategoryInfo { Primary = primaryCategory ?? "general" },
+                ImageUrl = article.TryGetProperty("image_url", out var img) ? img.GetString() : null
             };
 
             var raw = new RawContent

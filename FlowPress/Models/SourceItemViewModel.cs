@@ -68,6 +68,9 @@ public class NormalizedContent
     public string? Author { get; set; }
     public string? Language { get; set; }
     public CategoryInfo? Category { get; set; }
+    
+    [JsonIgnore]  // No se exporta al JSON
+    public string? ImageUrl { get; set; }
 }
 
 public class CategoryInfo
@@ -92,3 +95,4 @@ public class RawContent
     [JsonPropertyName("data")]
     public JsonElement? Data { get; set; }
 }
+

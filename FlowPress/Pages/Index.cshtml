@@ -585,14 +585,20 @@
             if (e.key === 'Escape') closeNewsModal();
         });
 
+        function decodeHtml(str) {
+        if (!str) return '';
+        const txt = document.createElement('textarea');
+        txt.innerHTML = str;
+        return txt.value;
+}
         // ── Cards de artículos destacados ─────────────────────────────
         document.querySelectorAll('.news-card').forEach(card => {
             card.addEventListener('click', () => {
                 openNewsModal({
-                    title:          card.dataset.title,
-                    summary:        card.dataset.summary,
-                    category:       card.dataset.category,
-                    source:         card.dataset.source,
+                    title:          decodeHtml(card.dataset.title),
+                    summary:        decodeHtml(card.dataset.summary),
+                    category:       decodeHtml(card.dataset.category),
+                    source:         decodeHtml(card.dataset.source),
                     date:           card.dataset.date,
                     url:            card.dataset.url,
                     image:          card.dataset.image,

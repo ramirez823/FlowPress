@@ -314,91 +314,72 @@
     }
 
     <!-- ARTÍCULOS DESTACADOS -->
-    <section class="section" id="articles">
-        <div class="section__header">
-            <div>
-                <p class="section__label">Últimas entradas</p>
-                <h2 class="section__title reveal">Artículos<br>destacados</h2>
-            </div>
-            <a asp-area="Identity" asp-page="/Account/Login" class="section__link">Ver todos →</a>
+   <section class="section" id="articles">
+    <div class="section__header">
+        <div>
+            <p class="section__label">Últimas entradas</p>
+            <h2 class="section__title reveal">Artículos<br>destacados</h2>
         </div>
+        <a asp-area="Identity" asp-page="/Account/Login" class="section__link">Ver todos →</a>
+    </div>
 
-        @{
-            var displayItems = Model.FeaturedItems.Any() ? Model.FeaturedItems : null;
-        }
+    @{
+        var displayItems = Model.FeaturedItems?.Take(6).ToList();
+    }
 
-        @if (displayItems is not null && displayItems.Any())
-        {
-            <div class="articles-grid">
-                @{
-                    var first = displayItems.First();
-                }
-                <div class="card card--featured reveal news-card" style="cursor:pointer;"
-                     data-title="@Html.Encode(first.Normalized?.Title ?? "Sin título")"
-                     data-summary="@Html.Encode(first.Normalized?.Summary ?? first.Normalized?.Content?.Substring(0, Math.Min(200, first.Normalized?.Content?.Length ?? 0)) ?? "")"
-                     data-category="@Html.Encode(first.Normalized?.Category?.Primary ?? "General")"
-                     data-source="@Html.Encode(first.Source?.Name ?? first.Schema?.Name ?? "Fuente")"
-                     data-date="@first.Normalized?.PublishedAt.ToString("dd MMM yyyy")"
-                     data-url="@Html.Encode(first.Normalized?.Url ?? "#")"
-                     data-image="@Html.Encode(first.Normalized?.ImageUrl ?? "")"
-                     data-source-item-id="@first.SourceItemId">
-                    <p class="card__category">@(first.Normalized?.Category?.Primary ?? "General")</p>
-                    <h3 class="card__title">@(first.Normalized?.Title ?? "Sin título")</h3>
-                    <p class="card__summary">@(first.Normalized?.Summary ?? first.Normalized?.Content?.Substring(0, Math.Min(200, first.Normalized?.Content?.Length ?? 0)))</p>
-                    <div class="card__meta">
-                        <span>@(first.Source?.Name ?? first.Schema?.Name ?? "Fuente")</span>
-                        <span class="card__meta-dot"></span>
-                        <span>@(first.Normalized?.PublishedAt.ToString("dd MMM yyyy"))</span>
-                    </div>
-                    <div class="card__accent-line"></div>
-                </div>
-
-                @foreach (var item in displayItems.Skip(1).Take(4))
-                {
-                    <div class="card reveal news-card" style="cursor:pointer;"
-                         data-title="@Html.Encode(item.Normalized?.Title ?? "Sin título")"
-                         data-summary="@Html.Encode(item.Normalized?.Summary ?? item.Normalized?.Content?.Substring(0, Math.Min(200, item.Normalized?.Content?.Length ?? 0)) ?? "")"
-                         data-category="@Html.Encode(item.Normalized?.Category?.Primary ?? "General")"
-                         data-source="@Html.Encode(item.Source?.Name ?? item.Schema?.Name ?? "Fuente")"
-                         data-date="@item.Normalized?.PublishedAt.ToString("dd MMM")"
-                         data-url="@Html.Encode(item.Normalized?.Url ?? "#")"
-                         data-image="@Html.Encode(item.Normalized?.ImageUrl ?? "")"
-                         data-source-item-id="@item.SourceItemId">
+    @if (displayItems != null && displayItems.Any())
+    {
+        <div class="articles-grid text-first">
+            @foreach (var item in displayItems)
+            {
+                <div class="card card--text reveal news-card" style="cursor:pointer;"
+                     data-title="@Html.Encode(item.Normalized?.Title ?? "Sin título")"
+                     data-summary="@Html.Encode(item.Normalized?.Summary ?? item.Normalized?.Content?.Substring(0, Math.Min(200, item.Normalized?.Content?.Length ?? 0)) ?? "")"
+                     data-category="@Html.Encode(item.Normalized?.Category?.Primary ?? "General")"
+                     data-source="@Html.Encode(item.Source?.Name ?? item.Schema?.Name ?? "Fuente")"
+                     data-date="@item.Normalized?.PublishedAt.ToString("dd MMM yyyy")"
+                     data-url="@Html.Encode(item.Normalized?.Url ?? "#")"
+                     data-source-item-id="@item.SourceItemId">
+                    
+                    <div class="card__content">
                         <p class="card__category">@(item.Normalized?.Category?.Primary ?? "General")</p>
+                        <div class="card__accent-line"></div>
+                        
                         <h3 class="card__title">@(item.Normalized?.Title ?? "Sin título")</h3>
+                        <p class="card__summary">@(item.Normalized?.Summary ?? item.Normalized?.Content?.Substring(0, Math.Min(140, item.Normalized?.Content?.Length ?? 0)) ?? "")</p>
+                        
                         <div class="card__meta">
                             <span>@(item.Source?.Name ?? item.Schema?.Name ?? "Fuente")</span>
                             <span class="card__meta-dot"></span>
-                            <span>@(item.Normalized?.PublishedAt.ToString("dd MMM"))</span>
+                            <span>@(item.Normalized?.PublishedAt.ToString("dd MMM yyyy"))</span>
                         </div>
-                        <div class="card__accent-line"></div>
                     </div>
-                }
-            </div>
-        }
-        else
-        {
-            <div class="articles-grid">
-                @for (int i = 0; i < 5; i++)
-                {
-                    <div class="card @(i == 0 ? "card--featured" : "") reveal">
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="articles-grid text-first">
+            @for (int i = 0; i < 6; i++)
+            {
+                <div class="card card--text reveal">
+                    <div class="card__content">
                         <p class="card__category">Tecnología</p>
-                        <h3 class="card__title">@(i == 0 ? "El futuro del periodismo digital está en la agregación inteligente de fuentes" : $"Artículo de ejemplo {i + 1}")</h3>
-                        @if (i == 0)
-                        {
-                            <p class="card__summary">Los nuevos sistemas de agregación permiten centralizar contenido de múltiples fuentes en tiempo real, transformando la forma en que consumimos información.</p>
-                        }
+                        <div class="card__accent-line"></div>
+                        <h3 class="card__title">La evolución del desarrollo web modular y sin dependencias</h3>
+                        <p class="card__summary">Un ejemplo de cómo se verá el texto del artículo cuando no haya contenido cargado en la base de datos de FlowPress.</p>
                         <div class="card__meta">
-                            <span>Example News</span>
+                            <span>FlowPress Data</span>
                             <span class="card__meta-dot"></span>
                             <span>@DateTime.Now.ToString("dd MMM yyyy")</span>
                         </div>
-                        <div class="card__accent-line"></div>
                     </div>
-                }
-            </div>
-        }
-    </section>
+                </div>
+            }
+        </div>
+    }
+</section>
 
     <!-- CÓMO FUNCIONA -->
     <section class="section how-section" id="how">
@@ -412,12 +393,12 @@
             <div class="step reveal">
                 <div class="step__number">01</div>
                 <h3 class="step__title">Conecta tus fuentes</h3>
-                <p class="step__desc">Agrega URLs de APIs, feeds RSS o endpoints JSON. FlowPress las lee y normaliza automáticamente.</p>
+                <p class="step__desc">Endpoints JSON. FlowPress las lee y normaliza automáticamente.</p>
             </div>
             <div class="step reveal">
                 <div class="step__number">02</div>
                 <h3 class="step__title">Explora el contenido</h3>
-                <p class="step__desc">El contenido se parsea y presenta de forma limpia. Filtra por fuente, categoría o fecha.</p>
+                <p class="step__desc">El contenido se parsea y presenta de forma limpia.</p>
             </div>
             <div class="step reveal">
                 <div class="step__number">03</div>

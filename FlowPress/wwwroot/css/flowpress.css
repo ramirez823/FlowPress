@@ -919,4 +919,65 @@ footer {
         background-color: var(--border);
     }
 
+
+
+
+
+
+
+
 }
+
+
+/* ── TEMA CLARO ─────────────────────────── */
+[data-theme="light"] {
+    --bg: #f5f0e8;
+    --bg-2: #ede8df;
+    --bg-3: #e0dbd0;
+    --fg: #1a1a1a;
+    --fg-muted: #6b6560;
+    --accent: #c47800;
+    --accent-2: #a06000;
+    --border: rgba(26, 26, 26, 0.12);
+}
+
+    [data-theme="light"] .nav.scrolled {
+        background: rgba(245, 240, 232, 0.95);
+    }
+
+[[data-theme="light"] #newsModal > div {
+    background: var(--bg-2) !important;
+    border-color: var(--border) !important;
+}
+
+[data-theme="light"] #modal-title {
+    color: var(--fg) !important;
+}
+
+[data-theme="light"] #modal-summary,
+[data-theme="light"] #modal-source,
+[data-theme="light"] #modal-date {
+    color: var(--fg-muted) !important;
+}
+
+[data-theme="light"] #modal-category {
+    color: var(--accent) !important;
+}
+
+[data-theme="light"] #modal-btn-download,
+[data-theme="light"] #newsModal button {
+    border-color: var(--border) !important;
+    color: var(--fg-muted) !important;
+    background: none !important;
+}
+
+[data-theme="light"] #modal-btn-link {
+    background: var(--accent) !important;
+    color: var(--bg) !important;
+}
+
+[data-theme="light"] body {
+    background-color: var(--bg);
+    color: var(--fg);
+}
+

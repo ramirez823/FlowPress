@@ -22,6 +22,14 @@
             <li><a href="#articles">Artículos</a></li>
             <li><a href="#how">Cómo funciona</a></li>
             <li><a href="#sources">Fuentes</a></li>
+            <li>
+                <button id="theme-toggle" class="nav__logout" 
+                        title="Cambiar tema" style="min-width:2.4rem;">
+                    ☀
+                </button>
+            </li>
+
+
 
             @if (User.IsInRole("Admin"))
             {
@@ -73,91 +81,91 @@
     </section>
 
     <!-- MODAL PREVIEW DE NOTICIA -->
-    <div id="newsModal" style="
-        display:none;
-        position:fixed;
-        inset:0;
-        z-index:9999;
-        background:rgba(0,0,0,0.75);
-        backdrop-filter:blur(4px);
-        align-items:center;
-        justify-content:center;
+<div id="newsModal" style="
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    background:rgba(0,0,0,0.75);
+    backdrop-filter:blur(4px);
+    align-items:center;
+    justify-content:center;
+">
+    <div style="
+        background:var(--bg-2);
+        border:1px solid var(--border);
+        border-radius:8px;
+        max-width:680px;
+        width:90%;
+        max-height:85vh;
+        overflow-y:auto;
+        position:relative;
+        box-shadow:0 0 60px rgba(0,0,0,0.8);
     ">
-        <div style="
-            background:#111;
-            border:1px solid #2a2a2a;
-            border-radius:8px;
-            max-width:680px;
-            width:90%;
-            max-height:85vh;
-            overflow-y:auto;
-            position:relative;
-            box-shadow:0 0 60px rgba(0,0,0,0.8);
-        ">
-            <!-- Barra dorada superior -->
-            <div style="height:3px;background:#b8860b;border-radius:8px 8px 0 0;"></div>
+        <!-- Barra dorada superior -->
+        <div style="height:3px;background:var(--accent);border-radius:8px 8px 0 0;"></div>
 
-            <!-- Imagen -->
-            <img id="modal-image" src="" alt=""
-                 style="width:100%;max-height:240px;object-fit:cover;display:none;" />
+        <!-- Imagen -->
+        <img id="modal-image" src="" alt=""
+             style="width:100%;max-height:240px;object-fit:cover;display:none;" />
 
-            <!-- Header -->
-            <div style="padding:1.5rem 1.5rem 0.5rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;">
-                <div>
-                    <p id="modal-category" style="font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:#b8860b;margin:0 0 0.4rem;"></p>
-                    <h2 id="modal-title" style="font-size:1.3rem;font-weight:700;color:#fff;margin:0;line-height:1.4;"></h2>
-                </div>
-                <button onclick="closeNewsModal()" style="background:none;border:none;color:#666;font-size:1.4rem;cursor:pointer;padding:0;line-height:1;flex-shrink:0;margin-top:2px;">✕</button>
+        <!-- Header -->
+        <div style="padding:1.5rem 1.5rem 0.5rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;">
+            <div>
+                <p id="modal-category" style="font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--accent);margin:0 0 0.4rem;"></p>
+                <h2 id="modal-title" style="font-size:1.3rem;font-weight:700;color:var(--fg);margin:0;line-height:1.4;"></h2>
+            </div>
+            <button onclick="closeNewsModal()" style="background:none;border:none;color:var(--fg-muted);font-size:1.4rem;cursor:pointer;padding:0;line-height:1;flex-shrink:0;margin-top:2px;">✕</button>
+        </div>
+
+        <!-- Body -->
+        <div style="padding:1rem 1.5rem 1.5rem;">
+            <p id="modal-summary" style="color:var(--fg-muted);line-height:1.75;font-size:0.95rem;margin:0 0 1.25rem;"></p>
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1.5rem;">
+                <span id="modal-source" style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--fg-muted);"></span>
+                <span style="color:var(--border);">·</span>
+                <span id="modal-date" style="font-size:0.75rem;color:var(--fg-muted);"></span>
             </div>
 
-            <!-- Body -->
-            <div style="padding:1rem 1.5rem 1.5rem;">
-                <p id="modal-summary" style="color:#aaa;line-height:1.75;font-size:0.95rem;margin:0 0 1.25rem;"></p>
-                <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1.5rem;">
-                    <span id="modal-source" style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:#555;"></span>
-                    <span style="color:#333;">·</span>
-                    <span id="modal-date" style="font-size:0.75rem;color:#555;"></span>
-                </div>
-
-                <!-- Botones -->
-                <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
-                    <a id="modal-link" href="#" target="_blank" rel="noopener" style="
-                        display:inline-block;padding:0.65rem 1.4rem;
-                        background:#b8860b;color:#000;font-weight:700;
-                        font-size:0.85rem;letter-spacing:0.05em;
-                        text-decoration:none;border-radius:4px;">
-                        Ver noticia completa →
-                    </a>
-                    <button id="modal-btn-download" onclick="downloadArticleJson()" style="
-                        padding:0.65rem 1.2rem;
-                        background:none;
-                        border:1px solid #444;
-                        color:#aaa;
-                        font-size:0.85rem;
-                        border-radius:4px;
-                        cursor:pointer;">
-                        ↓ Descargar JSON
-                    </button>
-                    <button id="modal-btn-tts" onclick="toggleTTS()" style="
-    background:none;
-    border:1px solid #444;
-    color:#aaa;
-    font-size:0.85rem;
-    border-radius:4px;
-    cursor:pointer;
-    transition: border-color 0.2s, color 0.2s;">
-    ▶ Leer noticia
-</button>
-                    <button onclick="closeNewsModal()" style="
-                        padding:0.65rem 1.2rem;background:none;
-                        border:1px solid #333;color:#666;
-                        font-size:0.85rem;border-radius:4px;cursor:pointer;">
-                        Cerrar
-                    </button>
-                </div>
+            <!-- Botones -->
+            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+                <a id="modal-link" href="#" target="_blank" rel="noopener" style="
+                    display:inline-block;padding:0.65rem 1.4rem;
+                    background:var(--accent);color:var(--bg);font-weight:700;
+                    font-size:0.85rem;letter-spacing:0.05em;
+                    text-decoration:none;border-radius:4px;">
+                    Ver noticia completa →
+                </a>
+                <button id="modal-btn-download" onclick="downloadArticleJson()" style="
+                    padding:0.65rem 1.2rem;
+                    background:none;
+                    border:1px solid var(--border);
+                    color:var(--fg-muted);
+                    font-size:0.85rem;
+                    border-radius:4px;
+                    cursor:pointer;">
+                    ↓ Descargar JSON
+                </button>
+                <button id="modal-btn-tts" onclick="toggleTTS()" style="
+                    background:none;
+                    border:1px solid var(--border);
+                    color:var(--fg-muted);
+                    font-size:0.85rem;
+                    border-radius:4px;
+                    cursor:pointer;
+                    transition: border-color 0.2s, color 0.2s;">
+                    ▶ Leer noticia
+                </button>
+                <button onclick="closeNewsModal()" style="
+                    padding:0.65rem 1.2rem;background:none;
+                    border:1px solid var(--border);color:var(--fg-muted);
+                    font-size:0.85rem;border-radius:4px;cursor:pointer;">
+                    Cerrar
+                </button>
             </div>
         </div>
     </div>
+</div>
 
     <!-- CARRUSEL -->
     @if (Model.NewsItems.Any())
@@ -537,8 +545,8 @@ function startTTS() {
     utterance.onstart = () => {
         ttsReading = true;
         ttsBtn.textContent = '⏹ Detener';
-        ttsBtn.style.borderColor = '#b8860b';
-        ttsBtn.style.color = '#b8860b';
+        ttsBtn.style.borderColor = '#444';
+ttsBtn.style.color = '#aaa';
     };
 
     utterance.onend = () => resetTTSBtn();
@@ -546,7 +554,7 @@ function startTTS() {
 
     window.speechSynthesis.cancel(); // limpiar cualquier lectura previa
     window.speechSynthesis.speak(utterance);
-}
+}  
 
 function stopTTS() {
     window.speechSynthesis.cancel();
@@ -658,5 +666,24 @@ function resetTTSBtn() {
             });
         });
     </script>
+
+
+    <script>
+            const root   = document.documentElement;
+            const btn    = document.getElementById('theme-toggle');
+            const saved  = localStorage.getItem('theme') || 'dark';
+
+            root.setAttribute('data-theme', saved);
+            btn.textContent = saved === 'dark' ? '☀' : '☾';
+
+            btn.addEventListener('click', () => {
+                const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                root.setAttribute('data-theme', next);
+                localStorage.setItem('theme', next);
+                btn.textContent = next === 'dark' ? '☀' : '☾';
+            });
+    </script>
+
+
 </body>
 </html>
